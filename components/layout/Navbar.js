@@ -21,7 +21,7 @@ export default function Navbar({isOpen,onToggle}){
 
         }
         finally{
-            dispatch(clearCredentials)
+            dispatch(clearCredentials())
             persistor.purge() //clear local storage
             router.push("/login")
         }
