@@ -1,3 +1,4 @@
+import useSocket from "@/hooks/useSocket";
 import "./globals.css";
 import StoreProvider from "@/store/StoreProvider";
 

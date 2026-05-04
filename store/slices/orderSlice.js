@@ -23,14 +23,21 @@ const orderSlice=createSlice({
         },
         updateOrderInList:(state,action)=>{
             const updated= action.payload
+            if(updated.status==="Picked Up"){
+                state.allOrders=state.allOrders.filter(o=>o.id!==updated.id)
+            }else{
+                const idx=state.allOrders.findIndex(o=>o.id===updated.id)
+                if(idx!==-1) state.allOrders[idx]=updated
+            }
             const myIdx=state.myOrders.findIndex(o=>o.id===updated.id)
             if(myIdx!==-1) state.myOrders[myIdx]=updated
-            const allIdx=state.allOrders.findIndex(o=>o.id===updated.id)
-            if(allIdx!==-1) state.allOrders[allIdx]=updated
-        }   
+        },
+        addNewOrder:(state,action)=>{
+            state.allOrders.unshift(action.payload)
+        }
     }
 })
 
 
-export const {setMyOrders,setAllOrders,setOrdersLoading,updateOrderInList}= orderSlice.actions
+export const {setMyOrders,setAllOrders,setOrdersLoading,updateOrderInList,addNewOrder}= orderSlice.actions
 export default orderSlice.reducer
