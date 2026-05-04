@@ -38,7 +38,7 @@ export default function MenuPage() {
         <p className="text-gray-500 text-sm mt-1">Browse and order your food</p>
       </div>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col md:flex-row gap-6">
         <div className="flex-1">
           {loading && (
             <p className="text-center text-gray-500 mt-10">Loading menu...</p>
@@ -48,7 +48,7 @@ export default function MenuPage() {
         </div>
 
         {/* Right — Cart (always visible) */}
-        <div className="w-80 mt-8">
+        <div className="w-full md:w-80 mt-8 md:sticky md:top-20 h-fit">
           <Cart />
         </div>
       </div>

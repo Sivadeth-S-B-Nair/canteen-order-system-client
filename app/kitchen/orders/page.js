@@ -40,7 +40,7 @@ export default function KitchenOrdersPage(){
                         <p className="text-gray-400 text-sm mt-1">New orders will appear here</p>
                     </div>
                 )}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {allOrders.map(order=>{
                         return(
                             <KitchenOrderCard key={order.id} order={order}/>

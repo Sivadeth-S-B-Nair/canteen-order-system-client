@@ -106,14 +106,17 @@ const NAV_LINKS = {
   ],
 };
 
-export default function Sidebar({ isOpen }) {
+export default function Sidebar({ isOpen, onClose}) {
   const pathname = usePathname();
   const { user } = useSelector((state) => state.auth);
 
   const links = NAV_LINKS[user?.role] || [];
 
   return (
-
+    <>
+    {isOpen&&(
+      <div className="fixed inset-0 bg-white bg-opacity-30 z-30 md:hidden" onClick={onClose}></div>
+    )}
       <aside
         className={`fixed top-16 left-0 h-[calc(100vh-4rem)] bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out z-40 w-64 ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
@@ -132,6 +135,6 @@ export default function Sidebar({ isOpen }) {
           })}
         </nav>
       </aside>
-    
+    </>
   );
 }

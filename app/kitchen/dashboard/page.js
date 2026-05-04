@@ -29,7 +29,7 @@ export default function KitchenDashboard(){
                 <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
                 <p className="text-gray-500 text-sm mt-1">Overview of canteen activity</p>
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-white rounded-lg shadow-sm p-6">
                     <p className="text-sm text-gray-500">Active Orders</p>
                     <p className="text-3xl font-bold text-blue-600 mt-1">{allOrders.length}</p>

@@ -166,35 +166,41 @@ export default function KitchenMenuPage() {
       </Dialog>
 
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b">
-            <tr>
-              {["Name", "Category", "Price", "Status", "Action"].map((h) => (
-                <th
-                  key={h}
-                  className="text-left px-4 py-3 text-gray-600 font-medium"
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-              {items.map(i=>(
-                <tr key={i.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium">{i.name}</td>
-                    <td className="px-4 py-3 text-gray-500">{i.category}</td>
-                    <td className="px-4 py-3">{parseFloat(i.price).toFixed(2)}</td>
-                    <td className="px-4 py-3">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${i.isAvailable?"bg-green-100 text-green-700":"bg-red-100 text-red-700"}`}>{i.isAvailable?"Available":"Unavailable"}</span>
-                    </td>
-                    <td className="px-4 py-3">
-                        <button onClick={()=>{handleToggle(i.id)}} className="text-blue-600 hover:underline text-sm">Toggle</button>
-                    </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
+        {/* Added overflow-x-auto wrapper for mobile scrolling */}
+        <div className="overflow-x-auto">
+          {/* Added whitespace-nowrap to prevent text from crushing together */}
+          <table className="w-full text-sm whitespace-nowrap min-w-150">
+            <thead className="bg-gray-50 border-b">
+              <tr>
+                {["Name", "Category", "Price", "Status", "Action"].map((h) => (
+                  <th
+                    key={h}
+                    className="text-left px-4 py-3 text-gray-600 font-medium"
+                  >
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+                {items.map(i=>(
+                  <tr key={i.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 font-medium">{i.name}</td>
+                      <td className="px-4 py-3 text-gray-500">{i.category}</td>
+                      <td className="px-4 py-3">${parseFloat(i.price).toFixed(2)}</td>
+                      <td className="px-4 py-3">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${i.isAvailable?"bg-green-100 text-green-700":"bg-red-100 text-red-700"}`}>
+                            {i.isAvailable?"Available":"Unavailable"}
+                          </span>
+                      </td>
+                      <td className="px-4 py-3">
+                          <button onClick={()=>{handleToggle(i.id)}} className="text-blue-600 hover:underline text-sm">Toggle</button>
+                      </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
