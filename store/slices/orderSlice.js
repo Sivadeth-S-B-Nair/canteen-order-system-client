@@ -33,7 +33,7 @@ const orderSlice=createSlice({
             if(myIdx!==-1) state.myOrders[myIdx]=updated
         },
         addNewOrder:(state,action)=>{
-            state.allOrders.unshift(action.payload)
+            state.allOrders.push(action.payload)
         }
     }
 })
