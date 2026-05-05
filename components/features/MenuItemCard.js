@@ -21,21 +21,25 @@ export default function MenuItemCard({ item }) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4 flex justify-between items-start">
-      <div className="flex-1">
+    <div className="bg-white rounded-lg shadow-sm flex flex-col h-full border border-gray-100">
+      <div className="w-full h-45 bg-gray-100 shrink-0">
+        <img src={item.imageUrl} alt={item.name} className="object-cover w-full h-full rounded-t-lg"/>
+      </div>
+      <div className="p-4 flex-col flex-1">
         <h3 className="font-medium text-gray-900">{item.name}</h3>
         <p className="text-sm text-gray-500 mt-1">{item.description}</p>
-        <p className="text-blue-600 font-semibold mt-2">
-          ${parseFloat(item.price).toFixed(2)}
-        </p>
+        <div className="mt-5 flex items-center justify-between">
+          <p className="text-blue-600 font-bold text-lg">
+            ${parseFloat(item.price).toFixed(2)}
+          </p>
+          <button
+            onClick={handleAdd}
+            className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium hover:bg-blue-700"
+          >
+            Add
+          </button>
+        </div>
       </div>
-
-      <button
-        onClick={handleAdd}
-        className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
-      >
-        Add
-      </button>
     </div>
   );
 }

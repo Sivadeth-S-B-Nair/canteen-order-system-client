@@ -26,7 +26,7 @@ export default function MenuGrid({ items }) {
             <h2 className="text-lg font-bold text-gray-700 mb-3 pb-2 border-b">
               {category}
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {grouped[category].map((item) => (
                 <MenuItemCard key={item.id} item={item} />
               ))}
