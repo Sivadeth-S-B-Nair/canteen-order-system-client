@@ -1,0 +1,178 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
+
+const getImageSrc=(path)=>{
+  if(!path) return null
+  if(path.startsWith("http")) return path
+  return `${process.env.NEXT_PUBLIC_API_URL}${path}`
+}
+
+export default function MenuItemModal({ item, onClose }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    setCurrentIndex(0);
+  }, [item?.id]);
+
+  useEffect(() => {
+    if (!item) return;
+    const handleKey = (e) => {
+      if (e.key === "ArrowLeft") prev();
+      if (e.key === "ArrowRight") next();
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [item, currentIndex]);
+
+  const isOpen = !!item;
+
+  const images =
+    item?.images && item.images.length > 0
+      ? item.images
+      : item?.imageUrl
+        ? [{ imageUrl: item.imageUrl, id: "legacy" }]
+        : [];
+
+  const hasMultiple = images.length > 1;
+
+  const prev = () =>
+    setCurrentIndex((i) => (i - 1 + images.length) % images.length);
+  const next = () =>
+    setCurrentIndex((i) => (i + 1) % images.length);
+
+  return (
+    // [CHANGE 4]: Replaced manual outer div with Headless UI <Dialog>
+    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
+      
+      {/* [CHANGE 5]: Copied the exact DialogBackdrop with transitions from KitchenMenuPage */}
+      <DialogBackdrop
+        transition
+        className="fixed inset-0 bg-gray-900/50 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
+      />
+
+      <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          
+          {/* [CHANGE 6]: Replaced inner wrapper with DialogPanel using exact KitchenMenuPage transition classes, kept max-w-lg */}
+          <DialogPanel
+            transition
+            className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg data-closed:sm:translate-y-0 data-closed:sm:scale-95"
+          >
+            {/* Carousel (Stays flush against the top of the modal) */}
+            <div className="relative bg-gray-100 h-72">
+              {images.length > 0 ? (
+                <img
+                  key={currentIndex}
+                  src={getImageSrc(images[currentIndex].imageUrl)}
+                  alt={item?.name || "Menu item"}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <p className="text-gray-400 text-sm">No image available</p>
+                </div>
+              )}
+
+              {hasMultiple && (
+                <>
+                  <button
+                    onClick={prev}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full w-9 h-9 flex items-center justify-center shadow text-gray-700 transition"
+                    aria-label="Previous image"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    onClick={next}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full w-9 h-9 flex items-center justify-center shadow text-gray-700 transition"
+                    aria-label="Next image"
+                  >
+                    ›
+                  </button>
+                </>
+              )}
+
+              {hasMultiple && (
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {images.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentIndex(idx)}
+                      className={`w-2 h-2 rounded-full transition-all ${
+                        idx === currentIndex
+                          ? "bg-white scale-125"
+                          : "bg-white/50 hover:bg-white/75"
+                      }`}
+                      aria-label={`Go to image ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
+
+              <button
+                onClick={onClose}
+                className="absolute top-3 right-3 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center shadow text-gray-600 transition"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+
+              {hasMultiple && (
+                <span className="absolute top-3 left-3 bg-black/50 text-white text-xs px-2 py-1 rounded-full">
+                  {currentIndex + 1} / {images.length}
+                </span>
+              )}
+            </div>
+
+            {/* [CHANGE 7]: Applied standard modal body padding (bg-white px-4 pt-5 sm:p-6) */}
+            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  {/* [CHANGE 8]: Replaced <h2> with Headless UI <DialogTitle> */}
+                  <DialogTitle as="h3" className="text-xl font-bold text-gray-900">
+                    {item?.name}
+                  </DialogTitle>
+                  <span className="inline-block mt-1 text-xs font-medium bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                    {item?.category}
+                  </span>
+                </div>
+                <p className="text-2xl font-bold text-blue-600 shrink-0">
+                  ${item ? parseFloat(item.price).toFixed(2) : "0.00"}
+                </p>
+              </div>
+
+              {item?.description && (
+                <p className="mt-3 text-sm text-gray-600 leading-relaxed">
+                  {item.description}
+                </p>
+              )}
+            </div>
+
+            {/* [CHANGE 9]: Created a standard modal footer (bg-gray-50) for the badges and close button to match KitchenMenuPage */}
+            <div className="bg-gray-50 px-4 py-3 sm:flex sm:items-center sm:justify-between sm:px-6">
+              <span
+                className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                  item?.isAvailable
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
+                }`}
+              >
+                {item?.isAvailable ? "Available" : "Currently unavailable"}
+              </span>
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+              >
+                Close
+              </button>
+            </div>
+          </DialogPanel>
+        </div>
+      </div>
+    </Dialog>
+  );
+}

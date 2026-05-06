@@ -3,13 +3,20 @@
 import { addToCart } from "@/store/slices/cartSlice";
 import { useDispatch, useSelector } from "react-redux";
 
-export default function MenuItemCard({ item }) {
+const getImageSrc=(path)=>{
+  if(!path) return null
+  if(path.startsWith("http")) return path
+  return `${process.env.NEXT_PUBLIC_API_URL}${path}`
+}
+
+export default function MenuItemCard({ item, onSelect }) {
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart.items);
 
   // const inCart = cartItems.find((i) => i.menuItemId === item.id);
 
-  const handleAdd = () => {
+  const handleAdd = (e) => {
+    e.stopPropagation();
     dispatch(
       addToCart({
         menuItemId: item.id,
@@ -21,9 +28,22 @@ export default function MenuItemCard({ item }) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm flex flex-col h-full border border-gray-100">
+    <div
+      className="bg-white rounded-lg shadow-sm flex flex-col h-full border border-gray-100 cursor-pointer hover:shadow-sm transition-shadow"
+      onClick={() => onSelect(item)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key=== " ") onSelect(item);
+      }}
+      aria-label={`View details for ${item.name}`}
+    >
       <div className="w-full h-45 bg-gray-100 shrink-0">
-        <img src={item.imageUrl} alt={item.name} className="object-cover w-full h-full rounded-t-lg"/>
+        <img
+          src={getImageSrc(item.imageUrl || item.images?.[0]?.imageUrl)}
+          alt={item.name}
+          className="object-cover w-full h-full rounded-t-lg"
+        />
       </div>
       <div className="p-4 flex-col flex-1">
         <h3 className="font-medium text-gray-900">{item.name}</h3>

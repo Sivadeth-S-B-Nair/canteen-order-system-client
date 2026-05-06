@@ -1,8 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import MenuItemCard from "./MenuItemCard";
+import MenuItemModal from "./MenuItemModal";
 
 export default function MenuGrid({ items }) {
+  const [selectedItem, setSelectedItem] = useState(null);
+
   const grouped = items.reduce((acc, item) => {
     if (!acc[item.category]) acc[item.category] = [];
     acc[item.category].push(item);
@@ -19,21 +23,28 @@ export default function MenuGrid({ items }) {
   }
 
   return (
-    <div className="space-y-8">
-      {categories.map((category) => {
-        return (
-          <div key={category}>
-            <h2 className="text-lg font-bold text-gray-700 mb-3 pb-2 border-b">
-              {category}
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {grouped[category].map((item) => (
-                <MenuItemCard key={item.id} item={item} />
-              ))}
+    <>
+      <div className="space-y-8">
+        {categories.map((category) => {
+          return (
+            <div key={category}>
+              <h2 className="text-lg font-bold text-gray-700 mb-3 pb-2 border-b">
+                {category}
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {grouped[category].map((item) => (
+                  <MenuItemCard
+                    key={item.id}
+                    item={item}
+                    onSelect={setSelectedItem}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+      <MenuItemModal item={selectedItem} onClose={() => setSelectedItem(null)} />
+    </>
   );
 }
