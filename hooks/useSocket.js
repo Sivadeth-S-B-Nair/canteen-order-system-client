@@ -16,7 +16,7 @@ export default function useSocket() {
 
     if (user.role === "kitchen") {
       socket.on("new-order", (order) => {
-        console.log("New order recieved:", order.id);
+        console.log("New confirmed order recieved:", order.id);
         dispatch(addNewOrder(order));
         toast(
           (t) => (
@@ -56,7 +56,15 @@ export default function useSocket() {
         console.log("Your order updated:", order.id, order.status);
         dispatch(updateOrderInList(order));
         const messages = {
-          "Cooking": {
+          CONFIRMED: {
+            message: `Order #${order.id} confirmed - kitchen is on it!`,
+            style: {
+              background: "#eff6ff",
+              border: "1px solid #bfdbfe",
+              color: "#1e40af",
+            },
+          },
+          Cooking: {
             message: `Order #${order.id} is being prepared`,
             type: "default",
             style: {
@@ -65,7 +73,7 @@ export default function useSocket() {
               color: "#92400e",
             },
           },
-          "Ready": {
+          Ready: {
             message: `Order #${order.id} is ready! Please collect it`,
             type: "success",
             style: {
@@ -84,12 +92,12 @@ export default function useSocket() {
             },
           },
         };
-        const config=messages[order.status]
-        if(config){
-            toast(config.message,{
-                duration:order.status==="Ready"?8000:4000,
-                style:config.style
-            })
+        const config = messages[order.status];
+        if (config) {
+          toast(config.message, {
+            duration: order.status === "Ready" ? 8000 : 4000,
+            style: config.style,
+          });
         }
       });
     }

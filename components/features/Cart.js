@@ -43,11 +43,11 @@ export default function Cart() {
       }))
       
       const res=await api.post("/api/orders",{items})
-      console.log(res.data);
+      const order=res.data.data
       
       dispatch(clearCart())
 
-      // router.push("/user/orders")
+      router.push(`/user/payment?orderId=${order.id}&amount=${order.totalPrice}`)
     }
     catch(err){
       setError(err.response?.data?.message || "Failed to place order")

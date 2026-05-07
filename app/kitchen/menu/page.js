@@ -224,7 +224,7 @@ export default function KitchenMenuPage() {
                             />
                           ) : (
                             <div className="flex gap-2">
-                              <div className="w-2/5 flex-shrink-0">
+                              <div className="w-2/5 shrink-0">
                                 <ImageTile
                                   img={imageFiles[0]}
                                   isPrimary

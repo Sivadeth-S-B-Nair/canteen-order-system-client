@@ -7,14 +7,14 @@ import { useState } from "react"
 import api from "@/lib/axios"
 import { updateOrderInList } from "@/store/slices/orderSlice"
 const NEXT_STATUS={
-    "Ordered":"Cooking",
-    "Cooking":"Ready",
-    "Ready":"Picked Up"
+    CONFIRMED:"Cooking",
+    Cooking:"Ready",
+    Ready:"Picked Up"
 }
 const BUTTON_LABEL={
-    "Ordered":"Start Cooking",
-    "Cooking":"Mark Ready",
-    "Ready":"Mark Picked Up"
+    CONFIRMED:"Start Cooking",
+    Cooking:"Mark Ready",
+    Ready:"Mark Picked Up"
 }   
 
 export default function KitchenOrderCard({order}){
