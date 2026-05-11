@@ -44,7 +44,10 @@ export default function MenuGrid({ items }) {
           );
         })}
       </div>
-      <MenuItemModal item={selectedItem} onClose={() => setSelectedItem(null)} />
+      <MenuItemModal
+        item={selectedItem}
+        onClose={() => setSelectedItem(null)}
+      />
     </>
   );
 }

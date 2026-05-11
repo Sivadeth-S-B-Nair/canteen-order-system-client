@@ -9,6 +9,18 @@ const getImageSrc=(path)=>{
   return `${process.env.NEXT_PUBLIC_API_URL}${path}`
 }
 
+function StarDisplay({average,count}){
+  if(!average||Number(count)===0) return null
+  const avg=parseFloat(average) 
+  const full=Math.round(avg)
+  return(
+    <div className="flex items-center gap-1 mt-1">
+      <span className="text-amber-400 text-xs leading-none">{"★".repeat(full)}{"☆".repeat(5-full)}</span>
+      <span className="text-xs text-gray-400">{avg.toFixed(1)}({Number(count)})</span>
+    </div>
+  )
+}
+
 export default function MenuItemCard({ item, onSelect }) {
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart.items);
@@ -47,6 +59,7 @@ export default function MenuItemCard({ item, onSelect }) {
       </div>
       <div className="p-4 flex-col flex-1">
         <h3 className="font-medium text-gray-900">{item.name}</h3>
+        <StarDisplay average={item.averageRating} count={item.ratingCount}/>
         <p className="text-sm text-gray-500 mt-1">{item.description}</p>
         <div className="mt-5 flex items-center justify-between">
           <p className="text-blue-600 font-bold text-lg">
