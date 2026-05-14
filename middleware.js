@@ -1,64 +1,73 @@
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const AUTH_ROUTES=["/login","/register"]
-const USER_ROUTES=["/user"]
-const KITCHEN_ROUTES=["/kitchen"]
+const AUTH_ROUTES = ["/login", "/register"];
+const SUPER_ROUTES = ["/super-admin"];
+const ADMIN_ROUTES = ["/restaurant-admin"];
+const KITCHEN_ROUTES = ["/kitchen"];
+const USER_ROUTES = ["/user"];
 
-export async function middleware(request){
-  const {pathname}=request.nextUrl
-  const refreshToken=request.cookies.get("refreshToken")?.value
+const ROLE_HOME = {
+  super_admin: "/super-admin/dashboard",
+  restaurant_admin: "/restaurant-admin/dashboard",
+  kitchen_staff: "/kitchen/orders",
+  user: "/user/restaurants",
+};
 
-  const isAuthRoute=AUTH_ROUTES.some(route=>pathname.startsWith(route))
-  const isUserRoute=USER_ROUTES.some(route=>pathname.startsWith(route))
-  const isKitchenRoute=KITCHEN_ROUTES.some(route=>pathname.startsWith(route))
+export async function middleware(request) {
+  const { pathname } = request.nextUrl;
+  const refreshToken = request.cookies.get("refreshToken")?.value;
 
-  if(!refreshToken && (isKitchenRoute || isUserRoute) ){
-    return NextResponse.redirect(new URL("/login",request.url))
+  const isAuthRoute = AUTH_ROUTES.some((route) => pathname.startsWith(route));
+  const isSuperRoute = SUPER_ROUTES.some((route) => pathname.startsWith(route));
+  const isAdminRoute = ADMIN_ROUTES.some((route) => pathname.startsWith(route));
+  const isKitchenRoute = KITCHEN_ROUTES.some((route) =>
+    pathname.startsWith(route),
+  );
+  const isUserRoute = USER_ROUTES.some((route) => pathname.startsWith(route));
+  const isProtected =
+    isSuperRoute || isAdminRoute || isKitchenRoute || isUserRoute;
+
+  if (!refreshToken && isProtected) {
+    return NextResponse.redirect(new URL("/login", request.url));
   }
-  
-  let decoded=null
-  if(refreshToken){
-    try{
-      const secret=new TextEncoder().encode(process.env.JWT_REFRESH_SECRET)
-      const {payload}=await jwtVerify(refreshToken,secret)
-      decoded=payload
-    }
-    catch(err){
-      console.error("JWT VERIFY FAILED:", err.message)  
-      const response=NextResponse.redirect(new URL("/login",request.url))
-      response.cookies.delete("refreshToken")
-      return response
-    }
-  }
 
-  if(decoded){
-    const role=decoded.role
-    if(isAuthRoute){
-      if(role==="kitchen"){
-        return NextResponse.redirect(new URL("/kitchen/dashboard",request.url))
-      }
-      else{
-        return NextResponse.redirect(new URL("/user/menu",request.url))
-      }
-    }
-
-    if(isKitchenRoute && role!=="kitchen"){
-      return NextResponse.redirect(new URL("/user/menu",request.url))
-    }
-
-    if(isUserRoute && role!=="user"){
-      return NextResponse.redirect(new URL("/kitchen/dashboard",request.url))
+  let decoded = null;
+  if (refreshToken) {
+    try {
+      const secret = new TextEncoder().encode(process.env.JWT_REFRESH_SECRET);
+      const { payload } = await jwtVerify(refreshToken, secret);
+      decoded = payload;
+    } catch (err) {
+      console.error("JWT VERIFY FAILED:", err.message);
+      const response = NextResponse.redirect(new URL("/login", request.url));
+      response.cookies.delete("refreshToken");
+      return response;
     }
   }
-  return NextResponse.next()
+
+  if (!decoded) return NextResponse.next();
+  const role = decoded.role;
+  const home=ROLE_HOME[role]
+  if (isAuthRoute) {
+    return NextResponse.redirect(new URL(home,request.url))
+  }
+
+  if(isSuperRoute && role!=="super_admin"){
+    return NextResponse.redirect(new URL(home, request.url));
+  }
+  if(isAdminRoute && role!=="restaurant_admin"){
+    return NextResponse.redirect(new URL(home, request.url));
+  }
+  if (isKitchenRoute && role !== "kitchen_staff") {
+    return NextResponse.redirect(new URL(home, request.url));
+  }
+
+  if (isUserRoute && role !== "user") {
+    return NextResponse.redirect(new URL(home, request.url));
+  }
 }
 
-export const config={
-  matcher:[
-    "/user/:path*",
-    "/kitchen/:path*",
-    "/login", 
-    "/register"
-  ]
-}
+export const config = {
+  matcher: ["/user/:path*", "/kitchen/:path*","/restaurant-admin/:path*","/super-admin/:path*", "/login", "/register"],
+};

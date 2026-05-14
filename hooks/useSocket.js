@@ -6,6 +6,8 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
 
+const STAFF_ROLES=["kitchen_staff","restaurant_admin"]
+
 export default function useSocket() {
   const dispatch = useDispatch();
   const { accessToken, user } = useSelector((state) => state.auth);
@@ -14,7 +16,7 @@ export default function useSocket() {
     if (!accessToken || !user) return;
     const socket = connectSocket(accessToken);
 
-    if (user.role === "kitchen") {
+    if (STAFF_ROLES.includes(user.role)) {
       socket.on("new-order", (order) => {
         console.log("New confirmed order recieved:", order.id);
         dispatch(addNewOrder(order));
