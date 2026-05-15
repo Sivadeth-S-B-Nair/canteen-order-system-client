@@ -41,7 +41,7 @@ export default function OrdersPage() {
           <div className="text-center py-10">
             <p className="text-gray-400">No orders yet</p>
             <a
-              href="/user/menu"
+              href="/user/restaurants"
               className="text-blue-600 text-sm mt-2 inline-block"
             >
               Order something

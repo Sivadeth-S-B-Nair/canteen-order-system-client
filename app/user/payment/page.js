@@ -33,7 +33,7 @@ export default function PaymentPage() {
 
   useEffect(() => {
     if (!orderId) {
-      router.replace("/user/menu");
+      router.replace("/user/restaurants");
     }
   }, [orderId, router]);
 
@@ -167,7 +167,7 @@ export default function PaymentPage() {
           >
             Try Again
           </button>
-          <button onClick={()=>router.push("/user/menu")} className="mt-3 w-full text-gray-500 text-sm hover:text-gray-700"> Cancel and go back to menu</button>
+          <button onClick={()=>router.push("/user/restaurants")} className="mt-3 w-full text-gray-500 text-sm hover:text-gray-700"> Cancel and go back to restaurant</button>
         </div>
       </div>
     );
@@ -234,7 +234,7 @@ export default function PaymentPage() {
           Pay ${amount ? parseFloat(amount).toFixed(2) : 0.0}
         </button>
         <button
-          onClick={() => router.push("/user/menu")}
+          onClick={() => router.push("/user/restaurants")}
           className="mt-3 w-full text-gray-400 text-sm hover:text-gray-600"
         >
           Cancel
