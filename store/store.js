@@ -20,12 +20,16 @@ const authPersistConfig = {
   storage,
   whitelist: ["user"],
 };
+const cartPersistConfig={
+  key:"cart",
+  storage
+}
 
 export const store = configureStore({
   reducer: {
     auth: persistReducer(authPersistConfig, authReducer),
     menu: menuReducer,
-    cart: cartReducer,
+    cart: persistReducer(cartPersistConfig,cartReducer),
     orders: orderReducer,
     profile: profileReducer,
   },

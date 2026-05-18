@@ -6,6 +6,7 @@ import api from "@/lib/axios";
 import { setMenuError, setMenuItems, setMenuLoading } from "@/store/slices/menuSlice";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { clearCart } from "@/store/slices/cartSlice";
 
 export default function RestaurantsPage() {
   const dispatch = useDispatch();
@@ -96,6 +97,7 @@ export default function RestaurantsPage() {
           onClick={() => {
             setSelectedRestaurant(null);
             dispatch(setMenuItems([])); // clear previous restaurant's menu
+            dispatch(clearCart()) 
           }}
           className="text-sm text-blue-600 hover:underline flex items-center gap-1 mb-3"
         >

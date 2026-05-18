@@ -161,7 +161,7 @@ export default function CheckoutPage() {
     if (cartItems.length === 0 && !loading && !isOrdered) {
       router.replace("/user/restaurants");
     }
-  }, [cartItems, router]);
+  }, [cartItems,loading, isOrdered, router]);
 
   useEffect(() => {
     if (!profile) {
@@ -202,7 +202,7 @@ export default function CheckoutPage() {
     try {
       const htmlInstructions = editor?.getHTML().trim() || "";
       const specialInstructions =
-        editor.isEmpty ? null : htmlInstructions;
+        editor?.isEmpty ? null : (editor?.getHTML().trim() || null);
       const payload = {
         items: cartItems.map((item) => ({
           menuItemId: item.menuItemId,
@@ -397,7 +397,7 @@ export default function CheckoutPage() {
               {/* Our custom toolbar — passes the editor instance down */}
               <TipTapToolbar editor={editor} />
               <EditorContent editor={editor} />
-              <div className="px-3 pb-2 text-right">
+              {/* <div className="px-3 pb-2 text-right">
                 <span
                   className={`text-xs ${
                     (editor?.getText().length || 0) > 450
@@ -407,14 +407,14 @@ export default function CheckoutPage() {
                 >
                   {editor?.getText().length || 0}/500
                 </span>
-              </div>
+              </div> */}
             </div>
 
-            <p className="text-xs text-gray-400 mt-2">
+            {/* <p className="text-xs text-gray-400 mt-2">
               Tip: Use <strong className="font-medium">B</strong> for bold,{" "}
               <em className="italic">I</em> for italic, or bullet lists for
               multiple notes.
-            </p>
+            </p> */}
           </div>
         </section>
 
