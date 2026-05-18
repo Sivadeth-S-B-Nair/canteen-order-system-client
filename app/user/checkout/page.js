@@ -200,7 +200,7 @@ export default function CheckoutPage() {
     setLoading(true);
     setError(null);
     try {
-      const htmlInstructions = editor?.getHTML().trim() || "";
+    //   const htmlInstructions = editor?.getHTML().trim() || "";
       const specialInstructions =
         editor?.isEmpty ? null : (editor?.getHTML().trim() || null);
       const payload = {

@@ -43,7 +43,27 @@ export default function OrderCard({ order }) {
         </div>
         <StatusBadge status={order.status} />
       </div>
-      <OrderItemsList orderItems={order.orderItems} />
+      <div className="mt-2">
+          {(order.deliveryType || "dine_in") === "delivery" ? (
+            <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">
+              🚚 Delivery order
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">
+              🍽️ Dine In
+            </span>
+          )}
+        </div>
+ 
+        <OrderItemsList orderItems={order.orderItems} />
+        {order.specialInstructions && order.specialInstructions.trim().length > 0 && (
+          <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+            <p className="text-xs font-medium text-gray-500 mb-1">Your instructions:</p>
+            <p className="text-sm text-gray-700 whitespace-pre-wrap">
+              {order.specialInstructions}
+            </p>
+          </div>
+        )}
       <div className="flex justify-between border-t mt-3 pt-3 font-semibold">
         <span>Total</span>
         <span>${parseFloat(order.totalPrice).toFixed(2)}</span>
