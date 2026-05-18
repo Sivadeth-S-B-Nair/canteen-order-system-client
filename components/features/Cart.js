@@ -1,17 +1,13 @@
 "use client";
 
-import api from "@/lib/axios";
 import { clearCart, removeFromCart, updateQty } from "@/store/slices/cartSlice";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 export default function Cart() {
   const dispatch = useDispatch();
   const router = useRouter();
   const cartItems = useSelector((state) => state.cart.items);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   const handleQtyChange = (menuItemId, newQty) => {
     if (newQty < 1) {
@@ -31,31 +27,36 @@ export default function Cart() {
     0,
   );
 
-  const handlePlaceOrder=async()=>{
-    if(cartItems.length===0) return
-    setLoading(true)
-    setError(null)
+  // const handlePlaceOrder=async()=>{
+  //   if(cartItems.length===0) return
+  //   setLoading(true)
+  //   setError(null)
 
-    try{
-      const items=cartItems.map(item=>({
-        menuItemId:item.menuItemId,
-        qty:item.qty
-      }))
-      
-      const res=await api.post("/api/orders",{items})
-      const order=res.data.data
-      
-      dispatch(clearCart())
+  //   try{
+  //     const items=cartItems.map(item=>({
+  //       menuItemId:item.menuItemId,
+  //       qty:item.qty
+  //     }))
 
-      router.push(`/user/payment?orderId=${order.id}&amount=${order.totalPrice}`)
-    }
-    catch(err){
-      setError(err.response?.data?.message || "Failed to place order")
-    }
-    finally{
-      setLoading(false)
-    }
-  }
+  //     const res=await api.post("/api/orders",{items})
+  //     const order=res.data.data
+
+  //     dispatch(clearCart())
+
+  //     router.push(`/user/payment?orderId=${order.id}&amount=${order.totalPrice}`)
+  //   }
+  //   catch(err){
+  //     setError(err.response?.data?.message || "Failed to place order")
+  //   }
+  //   finally{
+  //     setLoading(false)
+  //   }
+  // }
+
+  const handleCheckout = () => {
+    if (cartItems.length === 0) return;
+    router.push("/user/checkout");
+  };
 
   if (cartItems.length === 0) {
     return (
@@ -112,12 +113,11 @@ export default function Cart() {
         </div>
       </div>
 
-      {error && (
-        <p className="text-red-500 text-sm mt-2 text-center">{error}</p>
-      )}
-
-      <button disabled={loading} onClick={handlePlaceOrder} className="w-full mt-4 bg-green-600 text-white py-2 rounded font-medium hover:bg-green-700">
-        {loading?"Placing order...":`Place Order . $${total.toFixed(2)}`}
+      <button
+        onClick={handleCheckout}
+        className="w-full mt-4 bg-blue-600 text-white py-2 rounded font-medium hover:bg-blue-700"
+      >
+        Checkout . ${total.toFixed(2)}
       </button>
     </div>
   );
