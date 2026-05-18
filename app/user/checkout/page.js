@@ -51,15 +51,16 @@ function TipTapToolbar({ editor }) {
   return (
     <div className="flex gap-1 p-2 border-b border-gray-200 bg-gray-50 rounded-t-lg">
       {buttons.map((btn) => (
-        <button
+        <button 
           key={btn.title}
           type="button"
           title={btn.title}
           onClick={btn.action}
+          onMouseDown={(e) => e.preventDefault()}
           className={`px-2.5 py-1 rounded text-sm transition-colors ${btn.className} ${
             btn.active
-              ? "bg-blue-100 text-blue-700 font-medium"
-              : "text-gray-600 hover:bg-gray-200"
+              ? "bg-gray-800 text-white shadow-inner scale-95" // Highly visible active state
+              : "text-gray-600 hover:bg-gray-200 hover:text-gray-900"
           }`}
         >
           {btn.label}
@@ -143,7 +144,7 @@ export default function CheckoutPage() {
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
+    const [isOrdered,setIsOrdered]=useState(false)
   const editor = useEditor({
     extensions: [StarterKit],
     content: "",
@@ -151,13 +152,13 @@ export default function CheckoutPage() {
     editorProps: {
       attributes: {
         class:
-          "min-h-[80px] px-3 py-2 text-sm text-gray-800 focus:outline-none",
+          "min-h-[80px] px-3 py-2 text-sm text-gray-800 focus:outline-none [&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4",
       },
     },
   });
 
   useEffect(() => {
-    if (cartItems.length === 0 && !loading) {
+    if (cartItems.length === 0 && !loading && !isOrdered) {
       router.replace("/user/restaurants");
     }
   }, [cartItems, router]);
@@ -182,7 +183,7 @@ export default function CheckoutPage() {
       const defaultAddr = profile.addresses.find((a) => a.isDefault);
       setSelectedAddressId(defaultAddr?.id || profile.addresses[0]?.id || null);
     }
-  }, [profile]);
+  }, [profile,selectedAddressId]);
 
   const total = cartItems.reduce(
     (sum, item) => sum + parseFloat(item.price) * item.qty,
@@ -199,9 +200,9 @@ export default function CheckoutPage() {
     setLoading(true);
     setError(null);
     try {
-      const rawInstructions = editor?.getText().trim() || "";
+      const htmlInstructions = editor?.getHTML().trim() || "";
       const specialInstructions =
-        rawInstructions.length > 0 ? rawInstructions : null;
+        editor.isEmpty ? null : htmlInstructions;
       const payload = {
         items: cartItems.map((item) => ({
           menuItemId: item.menuItemId,
@@ -214,6 +215,7 @@ export default function CheckoutPage() {
       };
       const res = await api.post("/api/orders", payload);
       const order = res.data.data;
+      setIsOrdered(true)
       dispatch(clearCart());
       router.push(
         `/user/payment?orderId=${order.id}&amount=${order.totalPrice}`,
