@@ -6,7 +6,7 @@ import api from "@/lib/axios";
 import { setMenuError, setMenuItems, setMenuLoading } from "@/store/slices/menuSlice";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { clearCart } from "@/store/slices/cartSlice";
+import { clearCart,setCartRestaurant } from "@/store/slices/cartSlice";
 
 export default function RestaurantsPage() {
   const dispatch = useDispatch();
@@ -71,7 +71,9 @@ export default function RestaurantsPage() {
           {restaurants.map((r) => (
             <button
               key={r.id}
-              onClick={() => setSelectedRestaurant(r)}
+              onClick={() =>{ setSelectedRestaurant(r)
+                dispatch(setCartRestaurant(r.id))
+              }}
               className="bg-white rounded-xl border border-gray-200 p-6 text-left
                 hover:border-blue-400 hover:shadow-md transition-all group"
             >

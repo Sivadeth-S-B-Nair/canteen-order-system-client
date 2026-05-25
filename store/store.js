@@ -14,6 +14,7 @@ import menuReducer from "./slices/menuSlice";
 import cartReducer from "./slices/cartSlice";
 import orderReducer from "./slices/orderSlice";
 import profileReducer from "./slices/profileSlice";
+import promoReducer from "./slices/promoSlice"
 
 const authPersistConfig = {
   key: "auth",
@@ -32,6 +33,7 @@ export const store = configureStore({
     cart: persistReducer(cartPersistConfig,cartReducer),
     orders: orderReducer,
     profile: profileReducer,
+    promo:promoReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

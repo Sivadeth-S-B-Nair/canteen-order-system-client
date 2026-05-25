@@ -12,6 +12,8 @@ import StarterKit from "@tiptap/starter-kit";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import PromoCodeInput from "@/components/features/PromoCodeInput";
+import { clearPromo } from "@/store/slices/promoSlice";
 
 function TipTapToolbar({ editor }) {
   if (!editor) {
@@ -51,7 +53,7 @@ function TipTapToolbar({ editor }) {
   return (
     <div className="flex gap-1 p-2 border-b border-gray-200 bg-gray-50 rounded-t-lg">
       {buttons.map((btn) => (
-        <button 
+        <button
           key={btn.title}
           type="button"
           title={btn.title}
@@ -140,11 +142,14 @@ export default function CheckoutPage() {
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart.items);
   const { data: profile } = useSelector((state) => state.profile);
+
+  const promo = useSelector((state) => state.promo);
+
   const [diningOption, setDiningOption] = useState("dine_in");
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-    const [isOrdered,setIsOrdered]=useState(false)
+  const [isOrdered, setIsOrdered] = useState(false);
   const editor = useEditor({
     extensions: [StarterKit],
     content: "",
@@ -161,7 +166,7 @@ export default function CheckoutPage() {
     if (cartItems.length === 0 && !loading && !isOrdered) {
       router.replace("/user/restaurants");
     }
-  }, [cartItems,loading, isOrdered, router]);
+  }, [cartItems, loading, isOrdered, router]);
 
   useEffect(() => {
     if (!profile) {
@@ -179,16 +184,20 @@ export default function CheckoutPage() {
   }, [profile, dispatch]);
 
   useEffect(() => {
-    if (profile?.addresses?.length > 0 &&!selectedAddressId) {
+    if (profile?.addresses?.length > 0 && !selectedAddressId) {
       const defaultAddr = profile.addresses.find((a) => a.isDefault);
       setSelectedAddressId(defaultAddr?.id || profile.addresses[0]?.id || null);
     }
-  }, [profile,selectedAddressId]);
+  }, [profile, selectedAddressId]);
 
-  const total = cartItems.reduce(
+  const subtotal = cartItems.reduce(
     (sum, item) => sum + parseFloat(item.price) * item.qty,
     0,
   );
+
+  const restaurantId = useSelector((state) => state.cart.restaurantId);
+  const discountAmount = promo.discountAmount || 0;
+  const total = Math.max(0, subtotal - discountAmount);
 
   const addresses = profile?.addresses || [];
 
@@ -200,9 +209,10 @@ export default function CheckoutPage() {
     setLoading(true);
     setError(null);
     try {
-    //   const htmlInstructions = editor?.getHTML().trim() || "";
-      const specialInstructions =
-        editor?.isEmpty ? null : (editor?.getHTML().trim() || null);
+      //   const htmlInstructions = editor?.getHTML().trim() || "";
+      const specialInstructions = editor?.isEmpty
+        ? null
+        : editor?.getHTML().trim() || null;
       const payload = {
         items: cartItems.map((item) => ({
           menuItemId: item.menuItemId,
@@ -212,11 +222,13 @@ export default function CheckoutPage() {
         deliveryAddressId:
           diningOption === "delivery" ? selectedAddressId : null,
         specialInstructions,
+        promoCode: promo.code || null,
       };
       const res = await api.post("/api/orders", payload);
       const order = res.data.data;
-      setIsOrdered(true)
+      setIsOrdered(true);
       dispatch(clearCart());
+      dispatch(clearPromo());
       router.push(
         `/user/payment?orderId=${order.id}&amount=${order.totalPrice}`,
       );
@@ -229,6 +241,7 @@ export default function CheckoutPage() {
       setLoading(false);
     }
   };
+  console.log('cart restaurantId:', restaurantId)
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -273,6 +286,25 @@ export default function CheckoutPage() {
               </div>
             ))}
             {/* Total row */}
+
+            {discountAmount > 0 && (
+              <div className="pt-2 border-t border-gray-100 flex justify-between text-sm text-gray-500">
+                <span>Subtotal</span>
+                <span>${subtotal.toFixed(2)}</span>
+              </div>
+            )}
+            {discountAmount > 0 && (
+              <div className="flex justify-between text-sm font-medium text-green-600">
+                <span className="flex items-center gap-1.5">
+                  <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-semibold">
+                    {promo.code}
+                  </span>
+                  Discount
+                </span>
+                <span>− ${discountAmount.toFixed(2)}</span>
+              </div>
+            )}
+
             <div className="pt-3 border-t border-gray-100 flex justify-between font-bold text-gray-900">
               <span>Total</span>
               <span className="text-blue-600">${total.toFixed(2)}</span>
@@ -379,7 +411,23 @@ export default function CheckoutPage() {
             </div>
           </section>
         )}
-        {/* SECTION 4: Special Instructions (TipTap editor)*/}
+
+        {/* SECTION 4: Promo Code */}
+        <section className="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100">
+            <h2 className="font-semibold text-gray-800">
+              Promo Code
+              <span className="text-gray-400 font-normal text-sm ml-2">
+                (optional)
+              </span>
+            </h2>
+          </div>
+          <div className="px-6 py-4">
+            <PromoCodeInput restaurantId={restaurantId} subtotal={subtotal} />
+          </div>
+        </section>
+
+        {/* SECTION 5: Special Instructions (TipTap editor)*/}
         <section className="bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100">
             <h2 className="font-semibold text-gray-800">
