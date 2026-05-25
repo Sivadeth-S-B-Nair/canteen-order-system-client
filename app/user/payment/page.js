@@ -4,19 +4,33 @@ import api from "@/lib/axios";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const PAYMENT_METHODS = [
-  { id: "upi", label: "UPI", description: "Pay via UPI ID or QR code" },
-  {
-    id: "card",
-    label: "Credit/Debit Card",
-    description: "Visa, Mastercard, RuPay",
-  },
-  {
-    id: "netbanking",
-    label: "Net Banking",
-    description: "Paytm, Phonepe, Amazon Pay",
-  },
-];
+// const PAYMENT_METHODS = [
+//   { id: "upi", label: "UPI", description: "Pay via UPI ID or QR code" },
+//   {
+//     id: "card",
+//     label: "Credit/Debit Card",
+//     description: "Visa, Mastercard, RuPay",
+//   },
+//   {
+//     id: "netbanking",
+//     label: "Net Banking",
+//     description: "Paytm, Phonepe, Amazon Pay",
+//   },
+// ];
+
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
 
 export default function PaymentPage() {
   const router = useRouter();
@@ -25,9 +39,9 @@ export default function PaymentPage() {
   const orderId = searchParams.get("orderId");
   const amount = searchParams.get("amount");
 
-  const [selectedMethod, setSelectedMethod] = useState(null);
+  // const [selectedMethod, setSelectedMethod] = useState(null);
 
-  const [stage, setStage] = useState("idle");
+  const [stage, setStage] = useState("idle"); // idle | processing | success | failed | dismissed
   const [error, setError] = useState(null);
   const [paymentResult, setPaymentResult] = useState(null);
 
@@ -38,36 +52,84 @@ export default function PaymentPage() {
   }, [orderId, router]);
 
   const handlePay = async () => {
-    if (!selectedMethod) return;
-
     setStage("processing");
     setError(null);
-
+    const sdkLoaded = await loadRazorpayScript();
+    if (!sdkLoaded) {
+      setError("Could not load payment gateway. Please check your connection.");
+      setStage("idle");
+      return;
+    }
+    // Step 1: Ask our backend to create a Razorpay order
+    let initiateData;
     try {
-      const res = await api.post(`/api/payments/${orderId}/process`, {
-        method: selectedMethod,
-      });
-      const { paymentSuccess, payment } = res.data.data;
-      setPaymentResult(payment);
-      if (paymentSuccess) {
-        setStage("success");
-      } else {
-        setStage("failed");
-      }
-      console.log(res)
+      const res = await api.post(`/api/payments/${orderId}/initiate`);
+      initiateData = res.data.data;
     } catch (err) {
       setError(
-        err.response?.data?.message || "Something went wrong. Please try again",
+        err.response?.data?.message ||
+          "Could not initiate payment. Please try again.",
       );
       setStage("idle");
+      return;
     }
+
+    // Step 2: Open Razorpay checkout modal
+    return new Promise((resolve) => {
+      const options = {
+        key: initiateData.keyId,
+        amount: Math.round(parseFloat(initiateData.amount) * 100),
+        currency: initiateData.currency || "INR",
+        name: "Canteen Order System",
+        description: `Order ${orderId}`,
+        order_id: initiateData.razorpayOrderId,
+        handler: async (response) => {
+          // Step 3: Send the three Razorpay fields to our backend for verification
+          // Our backend recomputes the HMAC and only confirms the order if it matches
+          try {
+            const verifyRes = await api.post(
+              `/api/payments/${orderId}/verify`,
+              {
+                razorpayOrderId: response.razorpay_order_id,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
+              },
+            );
+            setPaymentResult(verifyRes.data.data.payment);
+            setStage("success");
+          } catch (err) {
+            setError(
+              err.response?.data?.message || "Payment verification failed",
+            );
+            setStage("failed");
+          }
+          resolve();
+        },
+        prefill: {
+          name: "",
+          email: "",
+          contact: "",
+        },
+        theme: { color: "#2563eb" },
+        modal: {
+          ondismiss: () => {
+            setStage("dismissed");
+            resolve();
+          },
+        },
+      };
+      const rzp = new window.Razorpay(options);
+      rzp.on("payment.failed", (response) => {
+        console.error("[Razorpay] payment.failed", response.error);
+      });
+      rzp.open();
+    });
   };
 
   const handleRetry = async () => {
     try {
       await api.post(`/api/payments/${orderId}/retry`);
       setStage("idle");
-      setSelectedMethod(null);
       setPaymentResult(null);
       setError(null);
     } catch (err) {
@@ -81,12 +143,10 @@ export default function PaymentPage() {
         <div className="bg-white rounded-xl shadow-sm p-10 text-center max-w-sm w-full">
           <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-6" />
           <h2 className="text-lg font-semibold text-gray-800">
-            Processing payment...
+            Opening payment gateway...
           </h2>
           <p className="text-sm text-gray-500 mt-2">
-            Communicating with{" "}
-            {PAYMENT_METHODS.find((m) => m.id === selectedMethod)?.label}.
-            Please wait
+            Complete the payment in Razorpay window
           </p>
           <p className="text-xs text-gray-400 mt-4">
             Do not close or refresh this page
@@ -117,10 +177,7 @@ export default function PaymentPage() {
           <h2 className="text-xl font-bold text-gray-800">
             Payment Successful!
           </h2>
-          <p>
-            ${parseFloat(amount).toFixed(2)} paid via{" "}
-            {PAYMENT_METHODS.find((m) => m.id === selectedMethod)?.label}
-          </p>
+          <p>${parseFloat(amount).toFixed(2)} paid via Razorpay</p>
           {paymentResult?.transactionId && (
             <p>Txn: {paymentResult.transactionId}</p>
           )}
@@ -159,7 +216,7 @@ export default function PaymentPage() {
           </div>
           <h2 className="text-xl font-bold text-gray-800">Payment Failed</h2>
           <p className="text-sm text-gray-500 mt-2">
-            We couldn't process your payment. Please try again
+            {error || "Payment could not be verified. Please try again"}
           </p>
           <button
             onClick={handleRetry}
@@ -167,7 +224,56 @@ export default function PaymentPage() {
           >
             Try Again
           </button>
-          <button onClick={()=>router.push("/user/restaurants")} className="mt-3 w-full text-gray-500 text-sm hover:text-gray-700"> Cancel and go back to restaurant</button>
+          <button
+            onClick={() => router.push("/user/restaurants")}
+            className="mt-3 w-full text-gray-500 text-sm hover:text-gray-700"
+          >
+            {" "}
+            Cancel and go back to restaurant
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (stage === "dismissed") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="bg-white rounded-xl shadow-sm p-10 text-center max-w-sm w-full">
+          <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg
+              className="w-8 h-8 text-yellow-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold text-gray-800">
+            Payment Not Completed
+          </h2>
+          <p className="text-sm text-gray-500 mt-2">
+            You closed the payment window. Your order is still reserved — you
+            can pay later from My Orders.
+          </p>
+          <button
+            onClick={() => setStage("idle")}
+            className="mt-6 w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700"
+          >
+            Try Again
+          </button>
+          <button
+            onClick={() => router.push("/user/orders")}
+            className="mt-3 w-full text-gray-500 text-sm hover:text-gray-700"
+          >
+            Pay Later from My Orders
+          </button>
         </div>
       </div>
     );
@@ -187,51 +293,34 @@ export default function PaymentPage() {
           </span>
         </div>
 
-        <p className="text-sm font-medium text-gray-700 mb-3">
-          Select payment method
-        </p>
-        <div className="space-y-3 mb-6">
-          {PAYMENT_METHODS.map((method) => (
-            <button
-              key={method.id}
-              onClick={() => setSelectedMethod(method.id)}
-              className={`w-full flex items-center gap-4 p-4 rounded-lg border-2 text-left transition-all ${selectedMethod === method.id ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-gray-300"}`}
-            >
-              <div className="flex-1">
-                <p
-                  className={`text-sm font-medium ${selectedMethod === method.id ? "text-blue-700" : "text-gray-800"}`}
+        <div className="bg-gray-50 rounded-lg p-4 mb-6">
+          <p className="text-sm text-gray-600 font-medium mb-2">
+            Accepted payment methods
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {["UPI", "Credit Card", "Debit Card", "Net Banking", "Wallets"].map(
+              (m) => (
+                <span
+                  key={m}
+                  className="text-xs bg-white border border-gray-200 rounded px-2 py-1 text-gray-600"
                 >
-                  {method.label}
-                </p>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  {method.description}
-                </p>
-              </div>
-              {selectedMethod === method.id && (
-                <svg
-                  className="w-5 h-5 text-blue-600 shrink-0"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              )}
-            </button>
-          ))}
+                  {m}
+                </span>
+              ),
+            )}
+          </div>
+          <p className="text-xs text-gray-400 mt-2">
+            Powered by Razorpay · 256-bit SSL secured
+          </p>
         </div>
         {error && (
           <p className="text-red-500 text-sm mb-4 text-center">{error}</p>
         )}
         <button
           onClick={handlePay}
-          disabled={!selectedMethod}
           className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold text-base hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
-          Pay ${amount ? parseFloat(amount).toFixed(2) : 0.0}
+          Pay ${amount ? parseFloat(amount).toFixed(2) : "0.00"} with Razorpay
         </button>
         <button
           onClick={() => router.push("/user/restaurants")}
