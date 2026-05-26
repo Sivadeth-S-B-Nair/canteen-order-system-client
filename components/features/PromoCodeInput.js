@@ -19,6 +19,11 @@ export default function PromoCodeInput({ restaurantId, subtotal }) {
     const code = input.trim().toUpperCase();
     if (!code) return;
 
+     if (!restaurantId) {
+      dispatch(setPromoError('Cannot apply promo: no restaurant selected'));
+      return;
+    }
+
     dispatch(setPromoLoading());
     try {
       const res = await api.post('/api/promo/validate', {
