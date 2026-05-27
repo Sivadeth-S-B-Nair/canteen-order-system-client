@@ -120,6 +120,7 @@ const NAV_LINKS = {
     { label: "Menu", href: "/restaurant-admin/menu", icon: <MenuIcon /> },
     { label: "Staff", href: "/restaurant-admin/staff", icon: <UsersIcon /> },
     { label: 'Promos', href: '/restaurant-admin/promos', icon: <ChartIcon /> },
+    { label: 'Refunds', href: '/restaurant-admin/refunds', icon: <StoreIcon /> },
   ],
   kitchen_staff: [
     { label: "Orders", href: "/kitchen/orders", icon: <OrdersIcon /> },
