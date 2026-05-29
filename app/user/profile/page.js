@@ -15,6 +15,7 @@ import {
 } from "@/store/slices/profileSlice";
 import AddressModal from "@/components/features/AddressModal";
 import { profileSchema } from "@/lib/validations";
+import { changePasswordSchema, changePasswordDefault } from "@/lib/validations";
 
 function FieldError({ message }) {
   if (!message) return null;
@@ -123,7 +124,188 @@ function AddressCard({ address, onEdit, onDelete, onSetDefault }) {
   );
 }
 
+function ChangePasswordSection({
+  showSection,
+  onToggle,
+  registerPw,
+  handleSubmitPw,
+  onSubmit,
+  pwErrors,
+  isPwSubmitting,
+  showCurrentPw,
+  setShowCurrentPw,
+  showNewPw,
+  setShowNewPw,
+  showConfirmPw,
+  setShowConfirmPw,
+}) {
+  return (
+    <section className="bg-white rounded-xl shadow-sm overflow-hidden">
+      {/* Header — clickable to expand/collapse */}
+      <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <div>
+          <h2 className="font-semibold text-gray-800">Password</h2>
+          <p className="text-xs text-gray-400 mt-0.5">
+            Change your account password
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onToggle}
+          className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+        >
+          {showSection ? "Cancel" : "Change password"}
+        </button>
+      </div>
+
+      {showSection && (
+        <div className="px-6 py-5">
+          <form
+            onSubmit={handleSubmitPw(onSubmit)}
+            noValidate
+            className="space-y-4 max-w-sm"
+          >
+            {/* Current password */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Current password
+              </label>
+              <div className="relative">
+                <input
+                  type={showCurrentPw ? "text" : "password"}
+                  {...registerPw("currentPassword")}
+                  autoComplete="current-password"
+                  className={`w-full border rounded-lg px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2
+                    ${pwErrors.currentPassword ? "border-red-400 focus:ring-red-300" : "focus:ring-blue-500"}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPw((p) => !p)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs select-none"
+                  tabIndex={-1}
+                >
+                  {showCurrentPw ? "Hide" : "Show"}
+                </button>
+              </div>
+              {pwErrors.currentPassword && (
+                <p className="text-red-500 text-xs mt-1">
+                  {pwErrors.currentPassword.message}
+                </p>
+              )}
+            </div>
+
+            {/* New password */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                New password
+              </label>
+              <div className="relative">
+                <input
+                  type={showNewPw ? "text" : "password"}
+                  {...registerPw("newPassword")}
+                  autoComplete="new-password"
+                  className={`w-full border rounded-lg px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2
+                    ${pwErrors.newPassword ? "border-red-400 focus:ring-red-300" : "focus:ring-blue-500"}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPw((p) => !p)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs select-none"
+                  tabIndex={-1}
+                >
+                  {showNewPw ? "Hide" : "Show"}
+                </button>
+              </div>
+              {pwErrors.newPassword && (
+                <p className="text-red-500 text-xs mt-1">
+                  {pwErrors.newPassword.message}
+                </p>
+              )}
+              <p className="text-xs text-gray-400 mt-1">
+                At least 6 characters
+              </p>
+            </div>
+
+            {/* Confirm new password */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Confirm new password
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPw ? "text" : "password"}
+                  {...registerPw("confirmPassword")}
+                  autoComplete="new-password"
+                  className={`w-full border rounded-lg px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2
+                    ${pwErrors.confirmPassword ? "border-red-400 focus:ring-red-300" : "focus:ring-blue-500"}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPw((p) => !p)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs select-none"
+                  tabIndex={-1}
+                >
+                  {showConfirmPw ? "Hide" : "Show"}
+                </button>
+              </div>
+              {pwErrors.confirmPassword && (
+                <p className="text-red-500 text-xs mt-1">
+                  {pwErrors.confirmPassword.message}
+                </p>
+              )}
+            </div>
+
+            <div className="flex gap-3 pt-1">
+              <button
+                type="submit"
+                disabled={isPwSubmitting}
+                className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+              >
+                {isPwSubmitting ? "Changing..." : "Change password"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default function ProfilePage() {
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [showCurrentPw, setShowCurrentPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
+  const [pwSuccess, setPwSuccess] = useState(false);
+
+  const {
+    register: registerPw,
+    handleSubmit: handleSubmitPw,
+    reset: resetPw,
+    formState: { errors: pwErrors, isSubmitting: isPwSubmitting },
+  } = useForm({
+    resolver: zodResolver(changePasswordSchema),
+    defaultValues: changePasswordDefault,
+    mode: "onTouched",
+  });
+
+  const handleChangePassword = async (data) => {
+    try {
+      await api.put("/api/profile/password", {
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+        confirmPassword: data.confirmPassword,
+      });
+      toast.success("Password changed successfully");
+      resetPw(changePasswordDefault);
+      setShowChangePassword(false);
+      setPwSuccess(false); // reset in case they open it again
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to change password");
+      throw err; // re-throw so RHF keeps the form open (doesn't clear)
+    }
+  };
+
   const dispatch = useDispatch();
   const { data: profile, loading } = useSelector((state) => state.profile);
   const { accessToken } = useSelector((state) => state.auth);
@@ -447,6 +629,24 @@ export default function ProfilePage() {
         onClose={() => setAddressModal({ open: false, initial: null })}
         onSubmit={addressModal.initial ? handleEditAddress : handleAddAddress}
         initial={addressModal.initial}
+      />
+      <ChangePasswordSection
+        showSection={showChangePassword}
+        onToggle={() => {
+          setShowChangePassword((p) => !p);
+          if (showChangePassword) resetPw(changePasswordDefault); //reset on cancel
+        }}
+        registerPw={registerPw}
+        handleSubmitPw={handleSubmitPw}
+        onSubmit={handleChangePassword}
+        pwErrors={pwErrors}
+        isPwSubmitting={isPwSubmitting}
+        showCurrentPw={showCurrentPw}
+        setShowCurrentPw={setShowCurrentPw}
+        showNewPw={showNewPw}
+        setShowNewPw={setShowNewPw}
+        showConfirmPw={showConfirmPw}
+        setShowConfirmPw={setShowConfirmPw}
       />
     </div>
   );
