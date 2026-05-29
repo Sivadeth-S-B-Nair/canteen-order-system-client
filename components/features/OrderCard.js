@@ -45,7 +45,7 @@ function CancelOrderModal({ order, onClose, onCancelled }) {
             <p className="font-medium">This order was already paid.</p>
             <p className="mt-1">
               Cancelling will submit a refund request of{" "}
-              <strong>${parseFloat(order.totalPrice).toFixed(2)}</strong> for
+              <strong>₹{parseFloat(order.totalPrice).toFixed(2)}</strong> for
               admin review. You'll receive an email when it's processed.
             </p>
           </div>
@@ -108,14 +108,14 @@ function RefundStatusBanner({ refundRequest }) {
       text: "text-amber-800",
       icon: "⏳",
       title: "Refund request pending",
-      body: `Your refund of $${parseFloat(refundRequest.refundAmount).toFixed(2)} is awaiting admin review.`,
+      body: `Your refund of ₹${parseFloat(refundRequest.refundAmount).toFixed(2)} is awaiting admin review.`,
     },
     APPROVED: {
       bg: "bg-green-50 border-green-200",
       text: "text-green-800",
       icon: "✓",
       title: "Refund approved",
-      body: `Your refund of $${parseFloat(refundRequest.refundAmount).toFixed(2)} has been approved.${
+      body: `Your refund of ₹${parseFloat(refundRequest.refundAmount).toFixed(2)} has been approved.${
         refundRequest.razorpayRefundId
           ? ` Refund ID: ${refundRequest.razorpayRefundId}. Allow 5–7 business days.`
           : " The restaurant will process it manually."
@@ -131,7 +131,7 @@ function RefundStatusBanner({ refundRequest }) {
         : "The restaurant did not approve this refund.",
     },
   };
-  
+
   const c = config[refundRequest.status] || config.PENDING;
 
   return (
@@ -222,7 +222,7 @@ export default function OrderCard({ order }) {
           )}
         <div className="flex justify-between border-t mt-3 pt-3 font-semibold">
           <span>Total</span>
-          <span>${parseFloat(order.totalPrice).toFixed(2)}</span>
+          <span>₹{parseFloat(order.totalPrice).toFixed(2)}</span>
         </div>
         {order.status === "PAYMENT_PENDING" && (
           <div className="mt-3 p-3 bg-red-50 rounded-lg">
@@ -240,7 +240,7 @@ export default function OrderCard({ order }) {
               }
               className="mt-2 w-full bg-red-600 text-white py-1.5 rounded text-sm font-medium hover:bg-red-700"
             >
-              Complete Payment . ${parseFloat(order.totalPrice).toFixed(2)}
+              Complete Payment . ₹{parseFloat(order.totalPrice).toFixed(2)}
             </button>
           </div>
         )}

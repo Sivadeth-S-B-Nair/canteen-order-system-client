@@ -120,7 +120,7 @@ export default function UsersPage() {
               <OrderItemsList orderItems={order.orderItems} />
               <div className="flex justify-between border-t mt-3 pt-3 font-semibold text-sm text-gray-800">
                 <span>Total</span>
-                <span>${parseFloat(order.totalPrice).toFixed(2)}</span>
+                <span>₹{parseFloat(order.totalPrice).toFixed(2)}</span>
               </div>
             </div>
           ))}

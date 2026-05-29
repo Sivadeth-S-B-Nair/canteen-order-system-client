@@ -277,11 +277,11 @@ export default function CheckoutPage() {
                     {item.name}
                   </p>
                   <p className="text-xs text-gray-500">
-                    ${parseFloat(item.price).toFixed(2)} × {item.qty}
+                    ₹{parseFloat(item.price).toFixed(2)} × {item.qty}
                   </p>
                 </div>
                 <p className="text-sm font-semibold text-gray-800">
-                  ${(parseFloat(item.price) * item.qty).toFixed(2)}
+                  ₹{(parseFloat(item.price) * item.qty).toFixed(2)}
                 </p>
               </div>
             ))}
@@ -290,7 +290,7 @@ export default function CheckoutPage() {
             {discountAmount > 0 && (
               <div className="pt-2 border-t border-gray-100 flex justify-between text-sm text-gray-500">
                 <span>Subtotal</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span>₹{subtotal.toFixed(2)}</span>
               </div>
             )}
             {discountAmount > 0 && (
@@ -301,7 +301,7 @@ export default function CheckoutPage() {
                   </span>
                   Discount
                 </span>
-                <span>− ${discountAmount.toFixed(2)}</span>
+                <span>− ₹{discountAmount.toFixed(2)}</span>
               </div>
             )}
 
@@ -479,7 +479,7 @@ export default function CheckoutPage() {
         >
           {loading
             ? "Placing Order..."
-            : `Confirm & Pay · $${total.toFixed(2)}`}
+            : `Confirm & Pay · ₹${total.toFixed(2)}`}
         </button>
 
         <p className="text-center text-xs text-gray-400 pb-4">

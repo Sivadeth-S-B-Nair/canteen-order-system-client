@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const AUTH_ROUTES = ["/login", "/register"];
+const AUTH_ROUTES = ["/login", "/register","/forgot-password","/reset-password"];
 const SUPER_ROUTES = ["/super-admin"];
 const ADMIN_ROUTES = ["/restaurant-admin"];
 const KITCHEN_ROUTES = ["/kitchen"];

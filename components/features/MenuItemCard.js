@@ -63,7 +63,7 @@ export default function MenuItemCard({ item, onSelect }) {
         <p className="text-sm text-gray-500 mt-1">{item.description}</p>
         <div className="mt-5 flex items-center justify-between">
           <p className="text-blue-600 font-bold text-lg">
-            ${parseFloat(item.price).toFixed(2)}
+            ₹{parseFloat(item.price).toFixed(2)}
           </p>
           <button
             onClick={handleAdd}

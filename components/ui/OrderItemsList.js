@@ -10,7 +10,7 @@ export default function OrderItemsList({orderItems}){
                 return(
                     <li key={item.id} className="flex justify-between text-sm text-gray-600">
                         <span>{item.snapshotName} x {item.qty}</span>
-                        <span>${(parseFloat(item.snapshotPrice)*item.qty).toFixed(2)}</span>
+                        <span>₹{(parseFloat(item.snapshotPrice)*item.qty).toFixed(2)}</span>
                     </li>
                 )
             })}

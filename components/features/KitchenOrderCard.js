@@ -73,7 +73,7 @@ export default function KitchenOrderCard({ order }) {
         )}
       <div className="flex justify-between border-t mt-3 pt-3 font-semibold">
         <span>Total</span>
-        <span>${parseFloat(order.totalPrice).toFixed(2)}</span>
+        <span>₹{parseFloat(order.totalPrice).toFixed(2)}</span>
       </div>
       {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
       {nextStatus && (

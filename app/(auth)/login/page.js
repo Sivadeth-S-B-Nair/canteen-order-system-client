@@ -112,6 +112,14 @@ export default function LoginPage() {
               </button>
             </div>
             <FieldError message={errors.password?.message} />
+            <div className="text-right mt-1">
+              <a
+                href="/forgot-password"
+                className="text-xs text-blue-600 hover:underline"
+              >
+                Forgot password?
+              </a>
+            </div>
           </div>
           <button
             type="submit"
@@ -132,3 +140,8 @@ export default function LoginPage() {
     </div>
   );
 }
+<div className="text-right mt-1">
+  <a href="/forgot-password" className="text-xs text-blue-600 hover:underline">
+    Forgot password?
+  </a>
+</div>;

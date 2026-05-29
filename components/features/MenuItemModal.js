@@ -139,7 +139,7 @@ export default function MenuItemModal({ item, onClose }) {
                   </span>
                 </div>
                 <p className="text-2xl font-bold text-blue-600 shrink-0">
-                  ${item ? parseFloat(item.price).toFixed(2) : "0.00"}
+                  ₹{item ? parseFloat(item.price).toFixed(2) : "0.00"}
                 </p>
               </div>
 

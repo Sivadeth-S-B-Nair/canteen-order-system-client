@@ -177,7 +177,7 @@ export default function PaymentPage() {
           <h2 className="text-xl font-bold text-gray-800">
             Payment Successful!
           </h2>
-          <p>${parseFloat(amount).toFixed(2)} paid via Razorpay</p>
+          <p>₹{parseFloat(amount).toFixed(2)} paid via Razorpay</p>
           {paymentResult?.transactionId && (
             <p>Txn: {paymentResult.transactionId}</p>
           )}
@@ -289,7 +289,7 @@ export default function PaymentPage() {
         <div className="bg-blue-50 rounded-lg p-4 mb-6 flex justify-between items-center">
           <span className="text-gray-600 font-medium">Amount to pay</span>
           <span className="text-2xl font-bold text-blue-600">
-            ${amount ? parseFloat(amount).toFixed(2) : "0.00"}
+            ₹{amount ? parseFloat(amount).toFixed(2) : "0.00"}
           </span>
         </div>
 
@@ -320,7 +320,7 @@ export default function PaymentPage() {
           onClick={handlePay}
           className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold text-base hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
-          Pay ${amount ? parseFloat(amount).toFixed(2) : "0.00"} with Razorpay
+          Pay ₹{amount ? parseFloat(amount).toFixed(2) : "0.00"} with Razorpay
         </button>
         <button
           onClick={() => router.push("/user/restaurants")}

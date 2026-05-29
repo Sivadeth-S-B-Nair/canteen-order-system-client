@@ -80,7 +80,7 @@ export default function Cart() {
               <div className="flex-1">
                 <p className="text-sm font-medium">{item.name}</p>
                 <p className="text-xs text-gray-500">
-                  ${parseFloat(item.price).toFixed(2)}
+                  ₹{parseFloat(item.price).toFixed(2)}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -99,7 +99,7 @@ export default function Cart() {
                 </button>
               </div>
               <p className="text-sm font-medium ml-3 w-16 text-right">
-                ${(parseFloat(item.price) * item.qty).toFixed(2)}
+                ₹{(parseFloat(item.price) * item.qty).toFixed(2)}
               </p>
             </div>
           );
@@ -109,7 +109,7 @@ export default function Cart() {
       <div className="border-t mt-4 pt-3">
         <div className="flex justify-between font-bold">
           <span>Total</span>
-          <span>${total.toFixed(2)}</span>
+          <span>₹{total.toFixed(2)}</span>
         </div>
       </div>
 
@@ -117,7 +117,7 @@ export default function Cart() {
         onClick={handleCheckout}
         className="w-full mt-4 bg-blue-600 text-white py-2 rounded font-medium hover:bg-blue-700"
       >
-        Checkout . ${total.toFixed(2)}
+        Checkout . ₹{total.toFixed(2)}
       </button>
     </div>
   );

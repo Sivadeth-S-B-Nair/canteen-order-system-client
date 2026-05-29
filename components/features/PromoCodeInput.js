@@ -56,7 +56,7 @@ export default function PromoCodeInput({ restaurantId, subtotal }) {
             <p className="text-xs text-green-600">
               {promo.discountType === 'percentage'
                 ? `${promo.discountValue}% off`
-                : `$${parseFloat(promo.discountValue).toFixed(2)} off`}
+                : `₹${parseFloat(promo.discountValue).toFixed(2)} off`}
               {' '}— you save ${parseFloat(promo.discountAmount).toFixed(2)}
             </p>
           </div>
