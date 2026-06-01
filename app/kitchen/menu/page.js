@@ -325,7 +325,7 @@ export default function KitchenMenuPage() {
                   <td className="px-4 py-3 font-medium">{i.name}</td>
                   <td className="px-4 py-3 text-gray-500">{i.category}</td>
                   <td className="px-4 py-3">
-                    ${parseFloat(i.price).toFixed(2)}
+                    ₹{parseFloat(i.price).toFixed(2)}
                   </td>
                   {/* [CHANGE 6]: Show image count in the table */}
                   <td className="px-4 py-3 text-gray-500">

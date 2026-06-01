@@ -68,7 +68,7 @@ function ReviewModal({ refundRequest, decision, onClose, onReviewed }) {
           <p className="mt-0.5">
             Refund amount:{" "}
             <strong>
-              ${parseFloat(refundRequest.refundAmount).toFixed(2)}
+              ₹{parseFloat(refundRequest.refundAmount).toFixed(2)}
             </strong>
           </p>
           {refundRequest.cancellationReason && (
@@ -178,7 +178,7 @@ function RefundRequestCard({ refundRequest, onReviewed }) {
           <p>
             <span className="font-medium">Refund amount:</span>{" "}
             <span className="text-green-700 font-semibold">
-              ${parseFloat(refundRequest.refundAmount).toFixed(2)}
+              ₹{parseFloat(refundRequest.refundAmount).toFixed(2)}
             </span>
           </p>
           {refundRequest.cancellationReason && (
@@ -207,7 +207,7 @@ function RefundRequestCard({ refundRequest, onReviewed }) {
                     {item.snapshotName} × {item.qty}
                   </span>
                   <span>
-                    ${(parseFloat(item.snapshotPrice) * item.qty).toFixed(2)}
+                    ₹{(parseFloat(item.snapshotPrice) * item.qty).toFixed(2)}
                   </span>
                 </li>
               ))}

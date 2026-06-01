@@ -24,7 +24,7 @@ const RANGES = [
 // formatter
 const currencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
-  currency: "USD",
+  currency: "INR",
   minimumFractionDigits: 0,
   maximumFractionDigits: 0,
 });
@@ -39,7 +39,7 @@ const compactFormatter = new Intl.NumberFormat("en-US", {
   notation: "compact",
   compactDisplay: "short",
   style: "currency",
-  currency: "USD",
+  currency: "INR",
 });
 
 // ─── Chart-specific tooltip components  ───────────────────────────────────────

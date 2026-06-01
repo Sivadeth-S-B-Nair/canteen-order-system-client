@@ -189,7 +189,7 @@ export default function AddMenuItemDialog({ open, onClose, onSubmit: onParentSub
 
                   {/* Price — with character rejection */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Price (₹)</label>
                     <input
                       type="text" // NOT type="number" — number inputs have browser quirks
                       inputMode="decimal" // shows numeric keyboard on mobile
