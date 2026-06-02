@@ -241,7 +241,7 @@ export default function CheckoutPage() {
       setLoading(false);
     }
   };
-  console.log('cart restaurantId:', restaurantId)
+  console.log("cart restaurantId:", restaurantId);
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -307,7 +307,7 @@ export default function CheckoutPage() {
 
             <div className="pt-3 border-t border-gray-100 flex justify-between font-bold text-gray-900">
               <span>Total</span>
-              <span className="text-blue-600">${total.toFixed(2)}</span>
+              <span className="text-blue-600">₹{total.toFixed(2)}</span>
             </div>
           </div>
         </section>

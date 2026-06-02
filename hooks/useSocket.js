@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
 
-const STAFF_ROLES=["kitchen_staff","restaurant_admin"]
+const STAFF_ROLES = ["kitchen_staff", "restaurant_admin"];
 
 export default function useSocket() {
   const dispatch = useDispatch();
@@ -27,7 +27,7 @@ export default function useSocket() {
                 New Order #{order.id}
               </p>
               <p className="text-sm text-gray-500">
-                {order.orderItems?.length} item . $
+                {order.orderItems?.length} item . ₹
                 {parseFloat(order.totalPrice).toFixed(2)}
               </p>
               <button
@@ -53,6 +53,57 @@ export default function useSocket() {
         dispatch(updateOrderInList(order));
       });
     }
+
+    if (user.role === "delivery_agent") {
+      // new-delivery: fired when the admin assigns this agent to an order
+      socket.on("new-delivery", (order) => {
+        console.log("New delivery assigned:", order.id);
+        dispatch(addNewOrder(order));
+        toast(
+          (t) => (
+            <div className="flex flex-col gap-1">
+              <p className="font-semibold text-gray-800">
+                New Delivery: Order #{order.id}
+              </p>
+              <p className="text-sm text-gray-500">
+                {order.orderItems?.length} item · ₹
+                {parseFloat(order.totalPrice).toFixed(2)}
+              </p>
+              {order.estimatedDeliveryTime && (
+                <p className="text-xs text-gray-400">
+                  ETA:{" "}
+                  {new Date(order.estimatedDeliveryTime).toLocaleTimeString(
+                    [],
+                    {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    },
+                  )}
+                </p>
+              )}
+              <button
+                onClick={() => toast.dismiss(t.id)}
+                className="text-xs text-emerald-600 hover:underline text-left mt-1"
+              >
+                Dismiss
+              </button>
+            </div>
+          ),
+          {
+            duration: 8000,
+            style: {
+              background: "#f0fdf4",
+              border: "1px solid #bbf7d0",
+              color: "#14532d",
+            },
+          },
+        );
+      });
+      socket.on("order-updated", (order) => {
+        dispatch(updateOrderInList(order));
+      });
+    }
+
     if (user.role === "user") {
       socket.on("order-updated", (order) => {
         console.log("Your order updated:", order.id, order.status);
@@ -84,6 +135,22 @@ export default function useSocket() {
               color: "#166534",
             },
           },
+          "Out for Delivery": {
+            message: `Order #${order.id} is out for delivery! 🛵`,
+            style: {
+              background: "#ecfdf5",
+              border: "1px solid #6ee7b7",
+              color: "#065f46",
+            },
+          },
+          Delivered: {
+            message: `Order #${order.id} has been delivered. Enjoy!`,
+            style: {
+              background: "#f0fdf4",
+              border: "1px solid #86efac",
+              color: "#166534",
+            },
+          },
           "Picked Up": {
             message: `Order #${order.id} picked up. Enjoy!`,
             type: "default",
@@ -97,7 +164,7 @@ export default function useSocket() {
         const config = messages[order.status];
         if (config) {
           toast(config.message, {
-            duration: order.status === "Ready" ? 8000 : 4000,
+            duration: order.status === "Ready" || order.status === "Delivered" ? 8000 : 4000,
             style: config.style,
           });
         }
@@ -106,6 +173,7 @@ export default function useSocket() {
 
     return () => {
       socket.off("new-order");
+       socket.off("new-delivery");
       socket.off("order-updated");
     };
   }, [accessToken, user, dispatch]);

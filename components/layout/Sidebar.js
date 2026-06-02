@@ -99,8 +99,49 @@ const ChartIcon = () => (
   </svg>
 );
 const PaymentsIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+  <svg
+    className="w-5 h-5"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+    />
+  </svg>
+);
+const DeliveryIcon = () => (
+  <svg
+    className="w-5 h-5"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M12 19l-7-7 7-7m7 7H5"
+    />
+  </svg>
+);
+
+const AgentsIcon = () => (
+  <svg
+    className="w-5 h-5"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+    />
   </svg>
 );
 
@@ -114,7 +155,11 @@ const NAV_LINKS = {
       icon: <StoreIcon />,
     },
     { label: "Users", href: "/super-admin/users", icon: <UsersIcon /> },
-    { label: "Payments", href: "/super-admin/payments", icon: <PaymentsIcon /> },
+    {
+      label: "Payments",
+      href: "/super-admin/payments",
+      icon: <PaymentsIcon />,
+    },
   ],
   restaurant_admin: [
     {
@@ -125,12 +170,24 @@ const NAV_LINKS = {
     { label: "Orders", href: "/restaurant-admin/orders", icon: <OrdersIcon /> },
     { label: "Menu", href: "/restaurant-admin/menu", icon: <MenuIcon /> },
     { label: "Staff", href: "/restaurant-admin/staff", icon: <UsersIcon /> },
-    { label: 'Promos', href: '/restaurant-admin/promos', icon: <ChartIcon /> },
-    { label: 'Refunds', href: '/restaurant-admin/refunds', icon: <StoreIcon /> },
-    { label: 'Payments', href: '/restaurant-admin/payments', icon: <PaymentsIcon /> },
+    { label: "Agents", href: "/restaurant-admin/delivery-agents", icon: <AgentsIcon /> },
+    { label: "Promos", href: "/restaurant-admin/promos", icon: <ChartIcon /> },
+    {
+      label: "Refunds",
+      href: "/restaurant-admin/refunds",
+      icon: <StoreIcon />,
+    },
+    {
+      label: "Payments",
+      href: "/restaurant-admin/payments",
+      icon: <PaymentsIcon />,
+    },
   ],
   kitchen_staff: [
     { label: "Orders", href: "/kitchen/orders", icon: <OrdersIcon /> },
+  ],
+  delivery_agent: [
+    { label: "My Deliveries", href: "/delivery/orders", icon: <DeliveryIcon /> },
   ],
   user: [
     { label: "Restaurants", href: "/user/restaurants", icon: <StoreIcon /> },
