@@ -164,7 +164,10 @@ export default function useSocket() {
         const config = messages[order.status];
         if (config) {
           toast(config.message, {
-            duration: order.status === "Ready" || order.status === "Delivered" ? 8000 : 4000,
+            duration:
+              order.status === "Ready" || order.status === "Delivered"
+                ? 8000
+                : 4000,
             style: config.style,
           });
         }
@@ -173,8 +176,28 @@ export default function useSocket() {
 
     return () => {
       socket.off("new-order");
-       socket.off("new-delivery");
+      socket.off("new-delivery");
       socket.off("order-updated");
     };
   }, [accessToken, user, dispatch]);
+}
+
+export function useOrderTracking(orderId, onLocationUpdate) {
+  const { accessToken, user } = useSelector((state) => state.auth);
+  useEffect(() => {
+    if (!accessToken || !user || !orderId) return;
+    const socket = connectSocket(accessToken);
+    socket.emit("join-order-room", { orderId });
+
+    const handleLocationUpdate = (data) => {
+      if (data.orderId === orderId) {
+        onLocationUpdate(data);
+      }
+    };
+    socket.on("location-update", handleLocationUpdate);
+
+    return () => {
+      socket.off("location-update", handleLocationUpdate);
+    };
+  }, [accessToken, user, orderId, onLocationUpdate]);
 }

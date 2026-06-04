@@ -145,6 +145,28 @@ const AgentsIcon = () => (
   </svg>
 );
 
+const TruckIcon = () => (
+  <svg
+    className="w-5 h-5"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"
+    />
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l1 1h1m8-1h2l3-3V9l-3-4h-2v11zm0 0H9"
+    />
+  </svg>
+);
+
 const NAV_LINKS = {
   super_admin: [
     { label: "Dashboard", href: "/super-admin/dashboard", icon: <HomeIcon /> },
@@ -170,7 +192,11 @@ const NAV_LINKS = {
     { label: "Orders", href: "/restaurant-admin/orders", icon: <OrdersIcon /> },
     { label: "Menu", href: "/restaurant-admin/menu", icon: <MenuIcon /> },
     { label: "Staff", href: "/restaurant-admin/staff", icon: <UsersIcon /> },
-    { label: "Agents", href: "/restaurant-admin/delivery-agents", icon: <AgentsIcon /> },
+    {
+      label: "Agents",
+      href: "/restaurant-admin/delivery-agents",
+      icon: <AgentsIcon />,
+    },
     { label: "Promos", href: "/restaurant-admin/promos", icon: <ChartIcon /> },
     {
       label: "Refunds",
@@ -187,7 +213,16 @@ const NAV_LINKS = {
     { label: "Orders", href: "/kitchen/orders", icon: <OrdersIcon /> },
   ],
   delivery_agent: [
-    { label: "My Deliveries", href: "/delivery/orders", icon: <DeliveryIcon /> },
+    {
+      label: "Dashboard",
+      href: "/agent/dashboard",
+      icon: <HomeIcon />,
+    },
+    {
+      label: "My Deliveries",
+      href: "/agent/orders",
+      icon: <TruckIcon />,
+    },
   ],
   user: [
     { label: "Restaurants", href: "/user/restaurants", icon: <StoreIcon /> },

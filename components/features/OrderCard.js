@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import RatingModal from "./RatingModal";
 import { useDispatch } from "react-redux";
 import { cancelOrderInList } from "@/store/slices/orderSlice";
-
+import Link from "next/link";
 
 function CancelOrderModal({ order, onClose, onCancelled }) {
   const [reason, setReason] = useState("");
@@ -145,7 +145,7 @@ function RefundStatusBanner({ refundRequest }) {
 }
 
 export default function OrderCard({ order }) {
-  const dispatch=useDispatch()
+  const dispatch = useDispatch();
   const placedAt = new Date(order.createdAt).toLocaleString();
   const router = useRouter();
   const [ratingData, setRatingData] = useState(null);
@@ -153,6 +153,8 @@ export default function OrderCard({ order }) {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const isCancellable =
     order.status === "PAYMENT_PENDING" || order.status === "CONFIRMED";
+  const isOutForDelivery = order.status === "Out for Delivery";
+  const isDelivery = (order.deliveryType || "dine_in") === "delivery";
 
   const handleOpenRating = async () => {
     setLoadingRating(true);
@@ -251,6 +253,19 @@ export default function OrderCard({ order }) {
             </p>
           </div>
         )}
+
+        {isDelivery && isOutForDelivery && (
+          <div className="mt-3">
+            <Link
+              href={`/user/orders/${order.id}`}
+              className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-2 rounded text-sm font-medium hover:bg-blue-700 transition-colors"
+            >
+              <span className="inline-block w-2 h-2 rounded-full bg-white animate-pulse" />
+              Track Live Delivery
+            </Link>
+          </div>
+        )}
+
         {order.status === "Picked Up" && (
           <div className="mt-3">
             <button

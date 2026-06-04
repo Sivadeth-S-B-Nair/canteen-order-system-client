@@ -6,12 +6,14 @@ const SUPER_ROUTES = ["/super-admin"];
 const ADMIN_ROUTES = ["/restaurant-admin"];
 const KITCHEN_ROUTES = ["/kitchen"];
 const USER_ROUTES = ["/user"];
+const AGENT_ROUTES=["/agent"]
 
 const ROLE_HOME = {
   super_admin: "/super-admin/dashboard",
   restaurant_admin: "/restaurant-admin/dashboard",
   kitchen_staff: "/kitchen/orders",
   user: "/user/restaurants",
+  delivery_agent:"/agent/dashboard"
 };
 
 export async function middleware(request) {
@@ -21,12 +23,14 @@ export async function middleware(request) {
   const isAuthRoute = AUTH_ROUTES.some((route) => pathname.startsWith(route));
   const isSuperRoute = SUPER_ROUTES.some((route) => pathname.startsWith(route));
   const isAdminRoute = ADMIN_ROUTES.some((route) => pathname.startsWith(route));
-  const isKitchenRoute = KITCHEN_ROUTES.some((route) =>
+  const isKitchenRoute = KITCHEN_ROUTES.some((route) => 
     pathname.startsWith(route),
   );
   const isUserRoute = USER_ROUTES.some((route) => pathname.startsWith(route));
+  const isAgentRoute=AGENT_ROUTES.some((route)=>pathname.startsWith(route))
+
   const isProtected =
-    isSuperRoute || isAdminRoute || isKitchenRoute || isUserRoute;
+    isSuperRoute || isAdminRoute || isKitchenRoute || isUserRoute || isAgentRoute;
 
   if (!refreshToken && isProtected) {
     return NextResponse.redirect(new URL("/login", request.url));
@@ -66,8 +70,11 @@ export async function middleware(request) {
   if (isUserRoute && role !== "user") {
     return NextResponse.redirect(new URL(home, request.url));
   }
+  if(isAgentRoute && role!=="delivery_agent"){
+    return NextResponse.redirect(new URL(home, request.url));
+  }
 }
 
 export const config = {
-  matcher: ["/user/:path*", "/kitchen/:path*","/restaurant-admin/:path*","/super-admin/:path*", "/login", "/register"],
+  matcher: ["/user/:path*", "/kitchen/:path*","/restaurant-admin/:path*","/super-admin/:path*","/agent/:path*", "/login", "/register"],
 };
