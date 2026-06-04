@@ -182,7 +182,7 @@ export default function useSocket() {
   }, [accessToken, user, dispatch]);
 }
 
-export function useOrderTracking(orderId, onLocationUpdate) {
+export function useOrderTracking(orderId, onLocationUpdate, onOrderUpdated) {
   const { accessToken, user } = useSelector((state) => state.auth);
   useEffect(() => {
     if (!accessToken || !user || !orderId) return;
@@ -194,10 +194,19 @@ export function useOrderTracking(orderId, onLocationUpdate) {
         onLocationUpdate(data);
       }
     };
+
+    const handleOrderUpdated = (data) => {
+      if (data.id === orderId && onOrderUpdated) {
+        onOrderUpdated(data);
+      }
+    };
+
     socket.on("location-update", handleLocationUpdate);
+    socket.on("order-updated", handleOrderUpdated);
 
     return () => {
       socket.off("location-update", handleLocationUpdate);
+      socket.off("order-updated", handleOrderUpdated);
     };
-  }, [accessToken, user, orderId, onLocationUpdate]);
+  }, [accessToken, user, orderId, onLocationUpdate,onOrderUpdated]);
 }

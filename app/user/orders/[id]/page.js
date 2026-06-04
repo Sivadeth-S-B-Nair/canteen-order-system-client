@@ -144,9 +144,14 @@ export default function OrderTrackingPage() {
     stalenessTimer.current = setTimeout(() => setLocationStale(true), 30000);
   }, []);
 
+  const handleOrderUpdated = useCallback((updatedOrder) => {
+    setOrder(updatedOrder);
+  }, []);
+
   useOrderTracking(
     order?.status === "Out for Delivery" ? order.id : null,
     handleLocationUpdate,
+    handleOrderUpdated
   );
 
   useEffect(() => {

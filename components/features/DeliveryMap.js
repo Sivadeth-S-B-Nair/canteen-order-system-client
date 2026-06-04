@@ -64,7 +64,7 @@ const destIcon = L.divIcon({
   popupAnchor: [0, -34],
 });
 
-function MapUpdater({ agentLocation, hasDeliveryPin }) {
+function MapUpdater({ agentLocation, destinationCoords }) {
   const map = useMap();
   const isFirstUpdate = useRef(true);
 
@@ -75,12 +75,26 @@ function MapUpdater({ agentLocation, hasDeliveryPin }) {
     if (isFirstUpdate.current) {
       // On first location: fit bounds to show agent + destination if both known
       isFirstUpdate.current = false;
-      map.setView(latlng, 15, { animate: true });
+      if (
+        destinationCoords &&
+        destinationCoords.latitude &&
+        destinationCoords.longitude
+      ) {
+        try {
+          const bounds = L.latLngBounds([
+            agentLatLng,
+            [destinationCoords.latitude, destinationCoords.longitude],
+          ]);
+          map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
+        } catch {
+          map.setView(latlng, 15, { animate: true });
+        }
+      }
     } else {
       // Smooth pan on subsequent updates
       map.panTo(latlng, { animate: true, duration: 0.8 });
     }
-  }, [agentLocation, map]);
+  }, [agentLocation, map, destinationCoords]);
 
   return null;
 }
@@ -95,6 +109,17 @@ export default function DeliveryMap({
   const center = agentLocation
     ? [agentLocation.latitude, agentLocation.longitude]
     : defaultCenter;
+
+  const hasDestPin =
+    deliveryAddress &&
+    deliveryAddress.latitude != null &&
+    deliveryAddress.longitude != null;
+  const destCoords = hasDestPin
+    ? {
+        latitude: parseFloat(deliveryAddress.latitude),
+        longitude: parseFloat(deliveryAddress.longitude),
+      }
+    : null;
   return (
     <MapContainer
       center={center}
@@ -113,7 +138,7 @@ export default function DeliveryMap({
       {/* Auto-pan when agent moves */}
       <MapUpdater
         agentLocation={agentLocation}
-        hasDeliveryPin={!!deliveryAddress?.latitude}
+        destinationCoords={destCoords}
       />
 
       {/* Agent marker — animated, live */}
@@ -139,9 +164,9 @@ export default function DeliveryMap({
       )}
 
       {/* Delivery destination marker — static */}
-      {deliveryAddress?.latitude && deliveryAddress?.longitude && (
+      {destCoords && (
         <Marker
-          position={[deliveryAddress.latitude, deliveryAddress.longitude]}
+          position={[destCoords.latitude, destCoords.longitude]}
           icon={destIcon}
         >
           <Popup>
@@ -153,6 +178,22 @@ export default function DeliveryMap({
             </div>
           </Popup>
         </Marker>
+      )}
+      {!destCoords && (
+        <div
+          style={{
+            position: "absolute",
+            bottom: 8,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 1000,
+            pointerEvents: "none",
+          }}
+        >
+          <div className="bg-white/90 text-xs text-gray-500 px-3 py-1.5 rounded-full shadow border border-gray-200">
+            Destination pin unavailable — add location when saving address
+          </div>
+        </div>
       )}
     </MapContainer>
   );
