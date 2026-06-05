@@ -4,9 +4,10 @@ import StatusBadge from "@/components/ui/StatusBadge";
 import { useOrderTracking } from "@/hooks/useSocket";
 import api from "@/lib/axios";
 import dynamic from "next/dynamic";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 const DeliveryMap = dynamic(() => import("@/components/features/DeliveryMap"), {
   ssr: false,
@@ -80,7 +81,7 @@ function StatusTimeline({ status }) {
             </div>
             {idx < STATUS_STEPS.length - 1 && (
               <div
-                className={`h-0.5 flex-1 mx-1 mt-[-14px] transition-all ${
+                className={`h-0.5 flex-1 mx-1 -mt-3.5 transition-all ${
                   idx < currentIdx ? "bg-blue-600" : "bg-gray-200"
                 }`}
               />
@@ -92,9 +93,31 @@ function StatusTimeline({ status }) {
   );
 }
 
+function AgentNearbyBanner({ onDismiss }) {
+  return (
+    <div className="bg-emerald-50 border-2 border-emerald-400 rounded-xl p-4 shadow-sm flex items-start gap-3 animate-pulse-once">
+      <span className="text-2xl shrink-0">🛵</span>
+      <div className="flex-1">
+        <p className="font-semibold text-emerald-800 text-sm">
+          Your delivery agent is nearby!
+        </p>
+        <p className="text-emerald-700 text-xs mt-0.5">
+          They're within 100 m — get ready to receive your order.
+        </p>
+      </div>
+      <button
+        onClick={onDismiss}
+        className="text-emerald-500 hover:text-emerald-700 text-lg leading-none ml-1"
+        aria-label="Dismiss"
+      >
+        ×
+      </button>
+    </div>
+  );
+}
+
 export default function OrderTrackingPage() {
   const { id } = useParams();
-  const router = useRouter();
   const orderId = parseInt(id, 10);
 
   const [order, setOrder] = useState(null);
@@ -102,8 +125,11 @@ export default function OrderTrackingPage() {
   const [error, setError] = useState(null);
   const [agentLocation, setAgentLocation] = useState(null);
   const [locationStale, setLocationStale] = useState(false);
+  const [agentNearby, setAgentNearby] = useState(false);
 
   const stalenessTimer = useRef(null);
+  // Prevent showing the "nearby" banner more than once per page load.
+  const nearbyShownRef = useRef(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -148,10 +174,29 @@ export default function OrderTrackingPage() {
     setOrder(updatedOrder);
   }, []);
 
+  const handleAgentNearby = useCallback(() => {
+    
+    if (nearbyShownRef.current) return null;
+
+    nearbyShownRef.current = true;
+    setAgentNearby(true);
+    // Also fire a toast for users who have the page backgrounded.
+    toast("🛵 Your delivery agent is just around the corner!", {
+      duration: 8000,
+      style: {
+        background: "#ecfdf5",
+        border: "1px solid #6ee7b7",
+        color: "#065f46",
+        fontWeight: 500,
+      },
+    });
+  }, []);
+
   useOrderTracking(
     order?.status === "Out for Delivery" ? order.id : null,
     handleLocationUpdate,
-    handleOrderUpdated
+    handleOrderUpdated,
+    handleAgentNearby,
   );
 
   useEffect(() => {
@@ -211,6 +256,11 @@ export default function OrderTrackingPage() {
           <StatusBadge status={order.status} />
         </div>
       </div>
+
+      {/* Agent-nearby geofence banner */}
+      {agentNearby && isOutForDelivery && (
+        <AgentNearbyBanner onDismiss={() => setAgentNearby(false)} />
+      )}
 
       {/* Status timeline — only for delivery orders */}
       {isDelivery && (

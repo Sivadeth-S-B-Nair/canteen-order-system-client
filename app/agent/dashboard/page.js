@@ -35,6 +35,40 @@ function AccuracyBadge({ accuracy }) {
   );
 }
 
+//Banner shown when the dwell-time geofence fires (30 s inside customer zone).
+
+function DwellPrompt({ orderId, onConfirm, onDismiss }) {
+  return (
+    <div className="bg-emerald-50 border-2 border-emerald-400 rounded-xl p-4 shadow-md">
+      <div className="flex items-start gap-3">
+        <span className="text-2xl">📍</span>
+        <div className="flex-1">
+          <p className="font-semibold text-emerald-800 text-sm">
+            You've been at the delivery address for 30+ seconds
+          </p>
+          <p className="text-emerald-700 text-xs mt-0.5">
+            Has the order been handed over to the customer?
+          </p>
+          <div className="flex gap-2 mt-3">
+            <button
+              onClick={onConfirm}
+              className="flex-1 bg-emerald-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors"
+            >
+              ✓ Yes, mark Delivered
+            </button>
+            <button
+              onClick={onDismiss}
+              className="px-4 text-emerald-600 border border-emerald-300 rounded-lg text-sm hover:bg-emerald-100 transition-colors"
+            >
+              Not yet
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AgentDashboard() {
   const { accessToken } = useSelector((state) => state.auth);
   const [activeOrder, setActiveOrder] = useState(null);
@@ -43,9 +77,13 @@ export default function AgentDashboard() {
   const [currentPosition, setCurrentPosition] = useState(null);
   const [gpsError, setGpsError] = useState(null);
   const [pingCount, setPingCount] = useState(0);
+  const [dwellPrompt, setDwellPrompt] = useState(null);
 
   const watchIdRef = useRef(null);
   const socketRef = useRef(null);
+  // Track which orders we've already shown the dwell prompt for this session
+  // so we don't re-fire it on every subsequent location ping.
+  const dwellShownRef = useRef(new Set());
 
   const fetchActiveOrder = useCallback(async () => {
     setLoading(true);
@@ -79,6 +117,14 @@ export default function AgentDashboard() {
     const socket = connectSocket(accessToken);
     socketRef.current = socket;
 
+    // ── Listen for geofence dwell prompt from server ─────────────────────
+    socket.on("delivery-dwell", ({ orderId, message }) => {
+      // Only show once per order per tracking session.
+      if (dwellShownRef.current.has(orderId)) return;
+      dwellShownRef.current.add(orderId);
+      setDwellPrompt({ orderId });
+    });
+
     watchIdRef.current = navigator.geolocation.watchPosition(
       (position) => {
         const { latitude, longitude, accuracy } = position.coords;
@@ -111,9 +157,13 @@ export default function AgentDashboard() {
       navigator.geolocation.clearWatch(watchIdRef.current);
       watchIdRef.current = null;
     }
+    if (socketRef.current) {
+      socketRef.current.off("delivery-dwell");
+    }
     setIsTracking(false);
     setCurrentPosition(null);
     setPingCount(0);
+    setDwellPrompt(null);
     toast("Location sharing stopped", { icon: "⏹️" });
   }, []);
 
@@ -125,7 +175,7 @@ export default function AgentDashboard() {
     };
   }, []);
 
-  const handleMarkDelivered = async () => {
+  const handleMarkDelivered = useCallback(async () => {
     if (!activeOrder) return;
     try {
       await api.patch(`/api/orders/${activeOrder.id}/delivery-status`, {
@@ -134,11 +184,18 @@ export default function AgentDashboard() {
       stopTracking();
       toast.success("Order marked as delivered");
       setActiveOrder(null);
+      setDwellPrompt(null);
+      dwellShownRef.current.clear();
       fetchActiveOrder();
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to update status");
     }
-  };
+  }, [activeOrder, stopTracking, fetchActiveOrder]);
+
+  const handleDwellConfirm = useCallback(async () => {
+    setDwellPrompt(null);
+    await handleMarkDelivered();
+  }, [handleMarkDelivered]);
 
   return (
     <div className="max-w-lg mx-auto space-y-6">
@@ -172,6 +229,15 @@ export default function AgentDashboard() {
         </div>
       ) : (
         <div className="space-y-4">
+          {/* Dwell prompt */}
+          {dwellPrompt && (
+            <DwellPrompt
+              orderId={dwellPrompt.orderId}
+              onConfirm={handleDwellConfirm}
+              onDismiss={() => setDwellPrompt(null)}
+            />
+          )}
+
           {/* Order card */}
           <div className="bg-white rounded-xl shadow-sm p-5">
             <div className="flex items-start justify-between mb-3">
@@ -210,6 +276,15 @@ export default function AgentDashboard() {
                 {activeOrder.deliveryAddress.phone && (
                   <p className="text-gray-500 text-xs mt-1">
                     📞 {activeOrder.deliveryAddress.phone}
+                  </p>
+                )}
+                {activeOrder.deliveryAddress.latitude ? (
+                  <p className="text-green-600 text-xs mt-1">
+                    ✓ Map pin available
+                  </p>
+                ) : (
+                  <p className="text-amber-500 text-xs mt-1">
+                    ⚠ No map pin — geofence inactive for this address
                   </p>
                 )}
               </div>
