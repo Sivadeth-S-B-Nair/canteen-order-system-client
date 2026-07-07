@@ -1,5 +1,6 @@
 "use client";
 
+import DeliveryMap from "@/components/features/DeliveryMap";
 import OrderItemsList from "@/components/ui/OrderItemsList";
 import StatusBadge from "@/components/ui/StatusBadge";
 import api from "@/lib/axios";
@@ -302,6 +303,16 @@ export default function AgentDashboard() {
                 )}
               </p>
             )}
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div className="h-72 sm:h-96">
+              <DeliveryMap
+                agentLocation={currentPosition}
+                deliveryAddress={activeOrder.deliveryAddress}
+                restaurantName={activeOrder.restaurant?.name}
+              />
+            </div>
           </div>
 
           {/* Location tracking card */}
